@@ -1,0 +1,86 @@
+import { createGrammar } from '~/base';
+import { sequence, fork, literal } from '~/expressions';
+import { getParserResults, getParserResultsCount } from './utils';
+
+async function getAllAsyncGeneratorResults<T>(
+  generator: AsyncIterableIterator<T>,
+) {
+  const results: T[] = [];
+  for await (const result of generator) {
+    results.push(result);
+  }
+  return results;
+}
+
+const color = fork({
+  marker: 'color',
+  children: [
+    literal({ text: 'foo', marker: 'foo' }),
+    literal({ text: 'bar', marker: 'bar' }),
+  ],
+});
+
+const colorILike = sequence({
+  children: [literal({ text: 'i like ' }), color],
+});
+
+describe('placeholders', () => {
+  it('will not execute children when parent has placeholder and there is no more content', async () => {
+    const results = await getParserResults(
+      fork({
+        placeholder: 'foo bar or baz',
+        children: [
+          literal({ text: 'foo' }),
+          literal({ text: 'bar' }),
+          literal({ text: 'baz' }),
+        ],
+      }),
+      '',
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0].matches).toHaveLength(1);
+    expect(results[0].matches[0]).toHaveProperty('type', 'placeholder');
+    expect(results[0].matches[0]).toHaveProperty('content', 'foo bar or baz');
+  });
+
+  it('will add placeholders when there is no input and placeholder prop is set', async () => {
+    const results = await getParserResults(
+      fork({
+        children: [
+          literal({ text: 'foo', placeholder: 'a' }),
+          literal({ text: 'bar', placeholder: 'b' }),
+          literal({ text: 'baz', placeholder: 'c' }),
+        ],
+      }),
+      '',
+    );
+
+    expect(results.length).toBe(3);
+    expect(
+      results.map((result) => {
+        return result.matches[0].content;
+      }),
+    ).toEqual(['a', 'b', 'c']);
+    expect(
+      results.every((result) => {
+        return result.matches[0].type === 'placeholder';
+      }),
+    ).toBe(true);
+  });
+
+  it('will only add placeholder once per branch', async () => {
+    const results = await getParserResults(
+      sequence({
+        children: [
+          literal({ text: 'foo', placeholder: 'a' }),
+          literal({ text: 'bar', placeholder: 'b' }),
+        ],
+      }),
+      '',
+    );
+
+    expect(results.length).toBe(1);
+    expect(results[0].matches.length).toBe(1);
+  });
+});

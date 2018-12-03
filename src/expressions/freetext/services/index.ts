@@ -1,0 +1,1 @@
+export { getSubstringsOfInput } from './substrings';
