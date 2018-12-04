@@ -32,7 +32,6 @@ export const pick = createParserFactory<PickOptions, string>(
       branch,
     )) {
       if (limit > 0 && ++yielded > limit) {
-        console.log('wai');
         return;
       }
       yield choosenBranch;

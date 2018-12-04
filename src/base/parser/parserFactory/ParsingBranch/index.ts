@@ -165,6 +165,10 @@ export class ParsingBranch<DataHolder, Marker> {
     return this.hasMatchOfType('placeholder');
   }
 
+  hasMatches() {
+    return this.getMatches().length > 0;
+  }
+
   hasMatchOfType(type: ParsingBranchMatchType) {
     return this.getMatches().some((match) => match.type === type);
   }

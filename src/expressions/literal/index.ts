@@ -16,10 +16,6 @@ export const literal = createParserFactory<LiteralOptions, string>(
       caseSensitive: isCaseSensitive,
     });
 
-    // if (!input) {
-    //   return;
-    // }
-
     if (!startsWithResult) {
       const resultWithSuggestion = startsWith(text, input, {
         caseSensitive: isCaseSensitive,
