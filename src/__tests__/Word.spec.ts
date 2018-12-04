@@ -96,18 +96,18 @@ describe('word parser', async () => {
         literal({ text: 'bar' }),
       ],
     });
-    // expect(await getParserResults(parser, 'foo')).toHaveLength(1);
-    // expect(await getParserResults(parser, 'foo ')).toHaveLength(1);
-    // expect(await getParserResults(parser, 'foo  ')).toHaveLength(0);
-    // expect(await getParserResults(parser, 'foo a')).toHaveLength(1);
-    // expect(await getParserResults(parser, 'foo ab')).toHaveLength(0);
-    // expect(await getParserResults(parser, 'foo a b')).toHaveLength(1);
-    // expect(await getParserResults(parser, 'foo a bc')).toHaveLength(0);
-    // expect(await getParserResults(parser, 'foo a b  c')).toHaveLength(0);
-    // expect(await getParserResults(parser, 'foo a b c')).toHaveLength(1);
-    // expect(await getParserResults(parser, 'foo a b cb')).toHaveLength(0);
+    expect(await getParserResults(parser, 'foo')).toHaveLength(1);
+    expect(await getParserResults(parser, 'foo ')).toHaveLength(1);
+    expect(await getParserResults(parser, 'foo  ')).toHaveLength(0);
+    expect(await getParserResults(parser, 'foo a')).toHaveLength(1);
+    expect(await getParserResults(parser, 'foo ab')).toHaveLength(0);
+    expect(await getParserResults(parser, 'foo a b')).toHaveLength(1);
+    expect(await getParserResults(parser, 'foo a bc')).toHaveLength(0);
+    expect(await getParserResults(parser, 'foo a b  c')).toHaveLength(0);
+    expect(await getParserResults(parser, 'foo a b c')).toHaveLength(1);
+    expect(await getParserResults(parser, 'foo a b cb')).toHaveLength(0);
     expect(await getParserResults(parser, 'foo a b c b')).toHaveLength(1);
-    // expect(await getParserResults(parser, 'foo a b c bar')).toHaveLength(1);
+    expect(await getParserResults(parser, 'foo a b c bar')).toHaveLength(1);
   });
 
   test('will not allow both text and children or none of them', async () => {
