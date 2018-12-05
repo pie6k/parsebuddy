@@ -1,5 +1,10 @@
 import { literal, sequence } from '~/expressions';
-import { getParserResults, getParserResultsMatched } from './utils';
+import {
+  getParserResults,
+  getParserResultsMatched,
+  getParserFirstResultData,
+  getParserFirstResult,
+} from './utils';
 
 describe('literal expression', () => {
   it('pass matching string', async () => {
@@ -125,5 +130,11 @@ describe('literal expression - fuzzy mode', () => {
     expect(
       await getParserResultsMatched(johnDoeCaseSensitive, 'sir doe'),
     ).toHaveLength(1);
+  });
+
+  it('will have higher score for less fuzzy results', async () => {
+    const acurateResult = await getParserFirstResult(johnDoe, 'sir joh doe');
+    const lessAcurateResult = await getParserFirstResult(johnDoe, 'sh do');
+    expect(acurateResult.score).toBeGreaterThan(lessAcurateResult.score);
   });
 });

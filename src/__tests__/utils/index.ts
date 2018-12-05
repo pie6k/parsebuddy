@@ -45,7 +45,7 @@ export async function getParserResultsCount<EmitType, DataHolder, Marker>(
   return results.length;
 }
 
-export async function getParserFirstResultData<EmitType, DataHolder, Marker>(
+export async function getParserFirstResult<EmitType, DataHolder, Marker>(
   parser: Parser<EmitType, DataHolder, Marker>,
   input: string,
   options?: GrammarParseOptions,
@@ -56,5 +56,19 @@ export async function getParserFirstResultData<EmitType, DataHolder, Marker>(
     return null;
   }
 
-  return results[0].data;
+  return results[0];
+}
+
+export async function getParserFirstResultData<EmitType, DataHolder, Marker>(
+  parser: Parser<EmitType, DataHolder, Marker>,
+  input: string,
+  options?: GrammarParseOptions,
+) {
+  const result = await getParserFirstResult(parser, input, options);
+
+  if (!result) {
+    return null;
+  }
+
+  return result.data;
 }

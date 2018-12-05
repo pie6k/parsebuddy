@@ -25,6 +25,11 @@ async function* parseAsFuzzy(
   for (const fuzzyMatch of fuzzyMatchData) {
     const { content, type } = fuzzyMatch;
     branch.addMatch({ content, type, marker });
+    if (type === 'fuzzy') {
+      // the longer fuzzy part is, the bigger negative scroe modifier
+      const scoreModifier = Math.pow(0.99, content.length);
+      branch.addScore(scoreModifier);
+    }
   }
   yield branch;
 }

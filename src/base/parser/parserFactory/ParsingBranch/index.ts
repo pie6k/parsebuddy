@@ -161,6 +161,7 @@ export class ParsingBranch<DataHolder, Marker> {
     return {
       matched: this.getMatchedInput(true),
       matches: this.matches,
+      score: this.getScore(),
       data: this.data,
     };
   }
@@ -202,7 +203,7 @@ export class ParsingBranch<DataHolder, Marker> {
   }
 
   getScore() {
-    this.scoreList.reduce((finalScore, anotherPoint) => {
+    return this.scoreList.reduce((finalScore, anotherPoint) => {
       return finalScore * anotherPoint;
     }, 1);
   }
