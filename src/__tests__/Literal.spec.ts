@@ -107,4 +107,23 @@ describe('literal expression - fuzzy mode', () => {
       { content: 'e', type: 'input', marker: null },
     ]);
   });
+
+  it('will be case insensitive by default', async () => {
+    expect(await getParserResultsMatched(johnDoe, 'Sir Doe')).toHaveLength(1);
+    expect(await getParserResultsMatched(johnDoe, 'sir doe')).toHaveLength(1);
+  });
+
+  it('will be case insensitive when enabled', async () => {
+    const johnDoeCaseSensitive = literal({
+      text: 'sir john doe',
+      isFuzzy: true,
+      isCaseSensitive: true,
+    });
+    expect(
+      await getParserResultsMatched(johnDoeCaseSensitive, 'Sir Doe'),
+    ).toHaveLength(0);
+    expect(
+      await getParserResultsMatched(johnDoeCaseSensitive, 'sir doe'),
+    ).toHaveLength(1);
+  });
 });

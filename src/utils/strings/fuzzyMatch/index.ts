@@ -7,12 +7,21 @@ interface FuzzyMatchData {
 
 export interface FuzzyMatchOptions {
   truncateTooLongInput?: boolean;
+  isCaseSensitive?: boolean;
+}
+
+function compareLetters(a: string, b: string, caseSensitive: boolean) {
+  if (caseSensitive) {
+    return a === b;
+  }
+
+  return a.toLowerCase() === b.toLowerCase();
 }
 
 export function fuzzyMatch(
   input: string,
   stringToBeFound: string,
-  { truncateTooLongInput }: FuzzyMatchOptions = {},
+  { truncateTooLongInput, isCaseSensitive }: FuzzyMatchOptions = {},
 ): FuzzyMatchData[] | false {
   // make some validation first
 
@@ -70,8 +79,14 @@ export function fuzzyMatch(
       break;
     }
 
+    const doesLetterMatch = compareLetters(
+      anotherStringToBeFoundLetter,
+      inputLetterToMatch,
+      isCaseSensitive,
+    );
+
     // if input letter doesnt match - we'll go to the next letter to try again
-    if (anotherStringToBeFoundLetter !== inputLetterToMatch) {
+    if (!doesLetterMatch) {
       // add this letter to buffer of ommited letters
       ommitedLettersBuffer.push(anotherStringToBeFoundLetter);
       // in case we had something in matched letters buffer - clear it as matching letters run ended

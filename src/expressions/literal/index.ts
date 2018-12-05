@@ -13,10 +13,10 @@ interface LiteralOptions {
 
 async function* parseAsFuzzy(
   branch: ParsingBranch<any, any>,
-  { text, marker }: ParserOptions<LiteralOptions, any, any>,
+  { text, marker, isCaseSensitive }: ParserOptions<LiteralOptions, any, any>,
 ) {
   const input = branch.getInput();
-  const fuzzyMatchData = fuzzyMatch(input, text);
+  const fuzzyMatchData = fuzzyMatch(input, text, { isCaseSensitive });
 
   if (!fuzzyMatchData) {
     return;
