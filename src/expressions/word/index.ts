@@ -5,7 +5,10 @@ interface WordOptions {
   text?: string;
 }
 
-function verifyAndPrepareBranchForWordStart(branch: ParsingBranch<any, any>) {
+function verifyAndPrepareBranchForWordStart<Marker>(
+  branch: ParsingBranch<any, Marker>,
+  marker: Marker,
+) {
   const matchedInput = branch.getMatchedInput();
   const input = branch.getInput();
 
@@ -23,7 +26,7 @@ function verifyAndPrepareBranchForWordStart(branch: ParsingBranch<any, any>) {
   }
 
   if (!input || input.startsWith(' ')) {
-    branch.addMatch({ content: ' ', type: 'whitespace' });
+    branch.addMatch({ content: ' ', type: 'whitespace', marker });
   }
 
   return branch;
@@ -47,7 +50,7 @@ function isBranchCorrectWordEnd(branch: ParsingBranch<any, any>) {
 
 export const word = createParserFactory<WordOptions, string>(
   async function*(branch, { options: { children, marker, text } }) {
-    const preparedBranch = verifyAndPrepareBranchForWordStart(branch);
+    const preparedBranch = verifyAndPrepareBranchForWordStart(branch, marker);
 
     if (!preparedBranch) {
       return;

@@ -21,7 +21,7 @@ type ParsingBranchMatchType =
 export interface ParsingBranchMatch<Marker> {
   content: string;
   type: ParsingBranchMatchType;
-  marker?: Marker;
+  marker: Marker;
 }
 
 export class ParsingBranch<DataHolder, Marker> {
@@ -107,8 +107,14 @@ export class ParsingBranch<DataHolder, Marker> {
     return this.matches;
   }
 
-  getMatchedInput() {
+  getMatchedInput(includeFuzzy = false) {
     return this.getMatches()
+      .filter((match) => {
+        if (includeFuzzy) {
+          return true;
+        }
+        return match.type !== 'fuzzy';
+      }) // fuzy match is not part of the input as it's putted in between of real input - it should be ignored when getting remaining input because of that
       .map((match) => match.content)
       .join('');
   }
@@ -130,6 +136,7 @@ export class ParsingBranch<DataHolder, Marker> {
     const originalAndMatchedParts = startsWith(originalInput, matchedInput);
 
     if (!originalAndMatchedParts) {
+      console.log({ originalInput, matchedInput }, this);
       throw new Error('Parsing branch has incorrect input');
     }
 
@@ -152,7 +159,7 @@ export class ParsingBranch<DataHolder, Marker> {
 
   getResult() {
     return {
-      matched: this.getMatchedInput(),
+      matched: this.getMatchedInput(true),
       matches: this.matches,
       data: this.data,
     };
@@ -174,6 +181,11 @@ export class ParsingBranch<DataHolder, Marker> {
   }
 
   addMatch(match: ParsingBranchMatch<Marker>) {
+    if (match.marker === undefined) {
+      this.throwError(
+        'marker cannot be undefined when adding match with .addMatch',
+      );
+    }
     this.validateNewMatch(match);
     this.matches = [...this.matches, match];
     return this;

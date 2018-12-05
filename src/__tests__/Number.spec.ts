@@ -19,7 +19,7 @@ describe('number parser', async () => {
   test('will emit proper number', async () => {
     const spy = jest.fn();
     await getParserResultsCount(number({}, spy), '42');
-    expect(spy).toBeCalledWith(null, 42);
+    expect(spy).toBeCalledWith(42, null);
   });
 
   test('will not match non-numbers', async () => {
@@ -60,7 +60,7 @@ describe('number parser', async () => {
   });
 
   test('will properly emit data', async () => {
-    const parser = number({}, (holder, number) => number);
+    const parser = number({}, (number, holder) => number);
     // expect(await getParserFirstResultData(parser, '3.14')).toBe(3.14);
     // expect(await getParserFirstResultData(parser, '-3.14')).toBe(-3.14);
     // expect(await getParserFirstResultData(parser, '2')).toBe(2);

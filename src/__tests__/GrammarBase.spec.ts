@@ -43,7 +43,7 @@ describe('createGrammarParser', () => {
         init: () => 'foo',
         clone: (foo) => foo,
       },
-      parser: literal({ text: 'bar' }, (foo, bar) => `${foo}-${bar}`),
+      parser: literal({ text: 'bar' }, (bar, foo) => `${foo}-${bar}`),
     });
 
     const results = await getAllAsyncGeneratorResults(grammar.parse('bar'));
@@ -59,7 +59,7 @@ describe('createGrammarParser', () => {
 
     const results = await getAllAsyncGeneratorResults(grammar.parse('bar'));
 
-    expect(spy).toBeCalledWith(null, 'bar');
+    expect(spy).toBeCalledWith('bar', null);
   });
 
   it('will spread results for forked grammar', async () => {
@@ -86,7 +86,7 @@ describe('createGrammarParser', () => {
 
   it('will emit data to result', async () => {
     const grammar = createGrammar<string, any>({
-      parser: literal({ text: 'foo' }, (holder, data) => `${data}-${data}`),
+      parser: literal({ text: 'foo' }, (data) => `${data}-${data}`),
     });
 
     const results = await getAllAsyncGeneratorResults(grammar.parse('foo'));
@@ -103,11 +103,11 @@ describe('createGrammarParser', () => {
       },
       parser: sequence({
         children: [
-          literal({ text: 'foo' }, (holder, data) => {
+          literal({ text: 'foo' }, (data, holder) => {
             holder.push(data);
           }), // pushing to reference - not returning
-          literal({ text: 'bar' }, (holder, data) => [...holder, data]), // returning different reference
-          literal({ text: 'baz' }, (holder, data) => [...holder, data]),
+          literal({ text: 'bar' }, (data, holder) => [...holder, data]), // returning different reference
+          literal({ text: 'baz' }, (data, holder) => [...holder, data]),
         ],
       }),
     });

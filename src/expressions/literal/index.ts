@@ -1,16 +1,42 @@
-import { createParserFactory } from '~/base/parser';
-import { startsWith } from '~/utils/strings';
+import {
+  createParserFactory,
+  ParsingBranch,
+  ParserOptions,
+} from '~/base/parser';
+import { startsWith, fuzzyMatch } from '~/utils/strings';
 
 interface LiteralOptions {
   text: string;
+  isFuzzy?: boolean;
   isCaseSensitive?: boolean;
 }
 
+async function* parseAsFuzzy(
+  branch: ParsingBranch<any, any>,
+  { text, marker }: ParserOptions<LiteralOptions, any, any>,
+) {
+  const input = branch.getInput();
+  const fuzzyMatchData = fuzzyMatch(input, text);
+
+  if (!fuzzyMatchData) {
+    return;
+  }
+
+  for (const fuzzyMatch of fuzzyMatchData) {
+    const { content, type } = fuzzyMatch;
+    branch.addMatch({ content, type, marker });
+  }
+  yield branch;
+}
+
 export const literal = createParserFactory<LiteralOptions, string>(
-  async function*(
-    branch,
-    { options: { text, marker, isCaseSensitive }, emit },
-  ) {
+  async function*(branch, { options, emit }) {
+    const { text, marker, isCaseSensitive, isFuzzy } = options;
+
+    if (isFuzzy) {
+      return yield* parseAsFuzzy(branch, options);
+    }
+
     const input = branch.getInput();
     const startsWithResult = startsWith(input, text, {
       caseSensitive: isCaseSensitive,
@@ -40,5 +66,7 @@ export const literal = createParserFactory<LiteralOptions, string>(
     emit(text);
     yield branch.addMatch({ content: text, marker, type: 'input' });
   },
-  { name: 'literal' },
+  {
+    name: 'literal',
+  },
 );

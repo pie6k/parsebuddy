@@ -2,18 +2,16 @@ import { AnyObject } from '~/utils/types';
 import {
   Parser,
   ParserOptions,
-  DataEmitHandler,
   createParserFactory,
   ParserFactoryOptions,
 } from './factory';
 // import { fork, literal } from '~/expressions';
 
 interface CustomParserDefinitionCreator<Options, EmitType> {
-  (options: ParserOptions<Options, any, any>, emit: any): Parser<
-    EmitType,
-    any,
-    any
-  >;
+  (
+    options: ParserOptions<Options, any, any>,
+    emit: (data: EmitType) => void,
+  ): Parser<EmitType, any, any>;
 }
 
 export function defineParser<Options extends AnyObject, EmitType>(
@@ -29,16 +27,3 @@ export function defineParser<Options extends AnyObject, EmitType>(
     options,
   );
 }
-
-// const city = defineParser<{ list: string[] }, string>(({ list }, emit) => {
-//   return fork({
-//     children: list.map((city) =>
-//       literal(
-//         {
-//           text: city,
-//         },
-//         emit,
-//       ),
-//     ),
-//   });
-// });

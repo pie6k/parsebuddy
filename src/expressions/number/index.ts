@@ -61,7 +61,7 @@ export const number = createParserFactory<NumberOptions, number>(
       return;
     }
     emit(number);
-    yield branch.addMatch({ content: numAsString, type: 'input' });
+    yield branch.addMatch({ content: numAsString, type: 'input', marker });
   },
   { name: 'number' },
 );

@@ -4,4 +4,6 @@ export {
   DataHolderConfig,
   Parser,
   defineParser,
+  ParserOptions,
+  ParserFactoryOptions,
 } from './parserFactory';

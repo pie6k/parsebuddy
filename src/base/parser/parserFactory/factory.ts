@@ -26,8 +26,12 @@ export interface ChildrenData<DataHolder, Marker> {
   marker?: Marker;
 }
 
-export interface DataEmitHandler<DataHolder, EmitType> {
-  (dataHolder: DataHolder, data: EmitType): DataHolder | void;
+const defaultBaseParserData: Partial<ChildrenData<any, any>> = {
+  marker: null,
+};
+
+export interface DataEmitHandler<EmitType, DataHolder> {
+  (data: EmitType, dataHolder: DataHolder): DataHolder | void;
 }
 
 interface ParserExecutorData<Options, EmitType> {
@@ -74,10 +78,15 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
 ) {
   return function createParser<DataHolder, Marker>(
     options?: ParserOptions<Options, DataHolder, Marker>,
-    onEmit?: DataEmitHandler<DataHolder, EmitType>,
+    onEmit?: DataEmitHandler<EmitType, DataHolder>,
   ): Parser<EmitType, DataHolder, Marker> {
     // apply default options
-    options = Object.assign({}, factoryOptions.defaultOptions || {}, options);
+    options = Object.assign(
+      {},
+      defaultBaseParserData,
+      factoryOptions.defaultOptions || {},
+      options,
+    );
     validateOptions(options, factoryOptions);
 
     async function* parser(
@@ -106,7 +115,7 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
 
       const emit = (data: EmitType) => {
         if (!onEmit) return;
-        const emitResult = onEmit(branch.getDataHolder(), data);
+        const emitResult = onEmit(data, branch.getDataHolder());
         if (emitResult !== undefined) {
           branch.setData(emitResult as DataHolder);
         }

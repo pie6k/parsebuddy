@@ -1,5 +1,5 @@
-import { literal } from '~/expressions';
-import { getParserResults } from './utils';
+import { literal, sequence } from '~/expressions';
+import { getParserResults, getParserResultsMatched } from './utils';
 
 describe('literal expression', () => {
   it('pass matching string', async () => {
@@ -52,5 +52,59 @@ describe('literal expression', () => {
       'foo',
     );
     expect(results).toHaveLength(0);
+  });
+});
+
+describe('literal expression - fuzzy mode', () => {
+  const johnDoe = literal({ text: 'sir john doe', isFuzzy: true });
+  it('will handle normal, not fuzzy input', async () => {
+    expect(await getParserResults(johnDoe, 'sir john doe')).toHaveLength(1);
+    expect(await getParserResults(johnDoe, 'sir')).toHaveLength(1);
+    expect(await getParserResults(johnDoe, 'sir ')).toHaveLength(1);
+    expect(await getParserResults(johnDoe, 'sir jo')).toHaveLength(1);
+  });
+
+  it('will pass fuzzy input', async () => {
+    expect(await getParserResults(johnDoe, 'sirjohndoe')).toHaveLength(1);
+    expect(await getParserResults(johnDoe, 'sjde')).toHaveLength(1);
+    expect(await getParserResults(johnDoe, 'sirdoe')).toHaveLength(1);
+  });
+
+  it('will work with other not fuzzy parsers', async () => {
+    const anotherParser = sequence({
+      children: [literal({ text: 'my name is ' }), johnDoe],
+    });
+    expect(
+      await getParserResultsMatched(anotherParser, 'my name is sir john doe'),
+    ).toHaveLength(1);
+    expect(
+      await getParserResultsMatched(anotherParser, 'my name is sj de'),
+    ).toHaveLength(1);
+    expect(
+      await getParserResultsMatched(anotherParser, 'my name sr de'),
+    ).toHaveLength(0);
+    expect(
+      await getParserResultsMatched(anotherParser, 'my name is '),
+    ).toHaveLength(1);
+  });
+
+  it('will generate proper matches for fuzzy', async () => {
+    const anotherParser = sequence({
+      children: [literal({ text: 'my name is ' }), johnDoe],
+    });
+    const [result] = await getParserResults(anotherParser, 'my name is sj de');
+
+    const matches = result.matches;
+
+    expect(matches).toEqual([
+      { content: 'my name is ', type: 'input', marker: null },
+      { content: 's', type: 'input', marker: null },
+      { content: 'ir ', type: 'fuzzy', marker: null },
+      { content: 'j', type: 'input', marker: null },
+      { content: 'ohn', type: 'fuzzy', marker: null },
+      { content: ' d', type: 'input', marker: null },
+      { content: 'o', type: 'fuzzy', marker: null },
+      { content: 'e', type: 'input', marker: null },
+    ]);
   });
 });

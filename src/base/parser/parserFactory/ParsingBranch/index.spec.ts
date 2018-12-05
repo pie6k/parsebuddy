@@ -47,10 +47,10 @@ describe('ParsingBranch', () => {
 
   it('will not allow adding match with incorrect input', () => {
     expect(() => {
-      getTestBranch().addMatch({ content: '', type: 'input' });
+      getTestBranch().addMatch({ content: '', type: 'input', marker: null });
     }).toThrow();
     expect(() => {
-      getTestBranch().addMatch({ content: 'bar', type: 'input' });
+      getTestBranch().addMatch({ content: 'bar', type: 'input', marker: null });
     }).toThrow();
     // expect(() => {
     //   getTestBranch().addMatch({ text: 'foo', type: 'input' });
@@ -60,11 +60,11 @@ describe('ParsingBranch', () => {
   it('properly gets input with matches', () => {
     const branch = getTestBranch();
     expect(branch.getInput()).toEqual('foo bar baz');
-    branch.addMatch({ content: 'foo ', type: 'input' });
+    branch.addMatch({ content: 'foo ', type: 'input', marker: null });
     expect(branch.getInput()).toEqual('bar baz');
-    branch.addMatch({ content: 'bar ', type: 'input' });
+    branch.addMatch({ content: 'bar ', type: 'input', marker: null });
     expect(branch.getInput()).toEqual('baz');
-    branch.addMatch({ content: 'baz', type: 'input' });
+    branch.addMatch({ content: 'baz', type: 'input', marker: null });
     expect(branch.getInput()).toEqual('');
     expect(branch.hasMoreInput()).toEqual(false);
   });
