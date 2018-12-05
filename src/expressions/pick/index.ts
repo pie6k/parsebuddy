@@ -1,6 +1,4 @@
 import { createParserFactory, Parser, ParsingBranch } from '~/base/parser';
-import { any } from 'prop-types';
-
 interface PickOptions {
   limit?: number;
 }

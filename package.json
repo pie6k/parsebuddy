@@ -1,5 +1,5 @@
 {
-  "name": "react-native-animated-manager",
+  "name": "parserbuddy",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,12 +8,8 @@
     "build": "tsc",
     "test:watch": "jest --watch"
   },
-  "peerDependencies": {
-    "react-native": "^0.57.5"
-  },
   "devDependencies": {
     "@types/jest": "^23.3.10",
-    "@types/react-native": "^0.57.12",
     "jest": "^23.6.0",
     "ts-jest": "^23.10.5",
     "typescript": "^3.1.6"
