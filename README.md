@@ -1,6 +1,6 @@
 # parsebuddy
 
-I don't have time now to write solid readme, so I'll paste grammar from demo page to learn by reading code:
+I don't have time now to write solid readme, so I'll paste grammar from [demo page](https://pie6k.github.io/parsebuddy/) to learn by reading code:
 
 ```ts
 import {
