@@ -8,10 +8,16 @@
     "lib": ["es2015", "esnext.asynciterable", "dom", "es7"],
     "downlevelIteration": true,
     "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
     "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["./src/*"]
     }
   },
-  "exclude": ["./node_modules/*", "./dist"]
+  "exclude": ["./node_modules/*", "./dist"],
+  "parcel-plugin-typescript": {
+    // If true type-checking is disabled
+    "transpileOnly": false
+  }
 }

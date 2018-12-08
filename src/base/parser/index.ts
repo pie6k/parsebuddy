@@ -6,4 +6,9 @@ export {
   defineParser,
   ParserOptions,
   ParserFactoryOptions,
+  DataEmitHandler,
+  ParserExecutorData,
+  ParsingBranchMatch,
+  ParsingBranchResult,
+  ParseMatchType,
 } from './parserFactory';

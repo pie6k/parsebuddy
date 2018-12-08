@@ -1,48 +1,79 @@
-import { createParserFactory } from '~/base/parser';
+import {
+  createParserFactory,
+  ParsingBranch,
+  ParserExecutorData,
+} from '~/base/parser';
 import { startsWith } from '~/utils/strings';
 
-function isWithinLimits(
-  number: number,
-  min: number = null,
-  max: number = null,
-) {
-  if (min !== null && number < min) {
-    return false;
-  }
-  if (max !== null && number > max) {
-    return false;
-  }
-  return true;
-}
+import {
+  floatNumRegExp,
+  getPossibleNumbers,
+  intNumRegExp,
+  isWithinLimits,
+  numRegExp,
+  numRegExpFollowedByWhitespace,
+  unifyNumberStringForParsing,
+} from './services';
+import { fork } from '../fork';
+import { literal } from '../literal';
 
 interface NumberOptions {
   min?: number;
   max?: number;
+  generateSuggestions?: boolean;
   ignoreNegative?: boolean;
   onlyInteger?: boolean;
 }
 
-const numRegExpFollowedByWhitespace = /^(\d+)(?:$|\s)/;
-const numRegExp = /^(\d+)/;
+async function* parseWithSuggestions(
+  branch: ParsingBranch<any, any>,
+  { options: { min, max }, emit }: ParserExecutorData<NumberOptions, number>,
+) {
+  const input = branch.getInput();
+  const possibleNumbers = getPossibleNumbers(min, max);
 
-const floatNumRegExp = /^-?\d+([\.\,]\d+)?/;
-const intNumRegExp = /^-?\d+/;
+  let matchedNumber = 0;
 
-function unifyNumberStringForParsing(input: string) {
-  input = input.replace(',', '.');
+  const parser = fork({
+    children: possibleNumbers.map((possibleNumber) => {
+      return literal({
+        text: `${possibleNumber}`,
+        onMatch: () => {
+          matchedNumber = possibleNumber;
+        },
+      });
+    }),
+  });
 
-  return input;
+  for await (let result of parser(branch)) {
+    const matches = result.getMatches();
+    const lastMatch = matches[matches.length - 1];
+
+    const number = parseFloat(lastMatch.content);
+    if (lastMatch.type === 'input') {
+      emit(result, number);
+    }
+    yield result;
+  }
 }
 
 export const number = createParserFactory<NumberOptions, number>(
-  async function*(
-    branch,
-    { options: { marker, min, max, onlyInteger, ignoreNegative }, emit },
-  ) {
+  async function*(branch, { options, emit }) {
+    const {
+      marker,
+      min,
+      max,
+      onlyInteger,
+      ignoreNegative,
+      generateSuggestions,
+    } = options;
+
+    if (onlyInteger && generateSuggestions) {
+      return yield* parseWithSuggestions(branch, { options, emit });
+    }
+
     const input = branch.getInput();
-
     const checkingRegExp = onlyInteger ? intNumRegExp : floatNumRegExp;
-
     const numberMatch = checkingRegExp.exec(input);
 
     if (numberMatch === null) {
@@ -50,7 +81,6 @@ export const number = createParserFactory<NumberOptions, number>(
     }
 
     const [numAsString] = numberMatch;
-
     const number = parseFloat(unifyNumberStringForParsing(numAsString));
 
     if (ignoreNegative && number < 0) {
@@ -60,8 +90,19 @@ export const number = createParserFactory<NumberOptions, number>(
     if (!isWithinLimits(number, min, max)) {
       return;
     }
-    emit(number);
+
+    emit(branch, number);
     yield branch.addMatch({ content: numAsString, type: 'input', marker });
   },
-  { name: 'number' },
+  {
+    name: 'number',
+    defaultOptions: { onlyInteger: true },
+    areOptionsValid: (options) => {
+      if (options.generateSuggestions && !options.onlyInteger) {
+        throw new Error(
+          'Number parser that generates suggestions must have option onlyInteger set to true.',
+        );
+      }
+    },
+  },
 );

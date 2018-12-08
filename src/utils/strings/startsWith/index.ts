@@ -3,6 +3,22 @@ export interface StartWithOptions {
   preserveCaseOfSubstring?: boolean; // startsWith('test', 'Te') => ['Te', 'st]
 }
 
+function startsWithBasic(
+  what: string,
+  withWhat: string,
+  caseSensitive: boolean,
+) {
+  if (withWhat.length > what.length) {
+    withWhat = withWhat.substr(0, what.length);
+  }
+
+  if (caseSensitive) {
+    return what.startsWith(withWhat);
+  }
+
+  return what.toLowerCase().startsWith(withWhat.toLowerCase());
+}
+
 export function startsWith(
   what: string,
   withWhat: string,
@@ -11,8 +27,13 @@ export function startsWith(
     preserveCaseOfSubstring = false,
   }: StartWithOptions = {},
 ): [string, string] | false {
+  if (!startsWithBasic(what, withWhat, caseSensitive)) {
+    // return false;
+  }
+
   const originalWithWhat = withWhat;
   let whatCaseAware = what;
+
   if (!caseSensitive) {
     withWhat = withWhat.toLowerCase();
     whatCaseAware = whatCaseAware.toLowerCase();

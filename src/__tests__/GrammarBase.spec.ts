@@ -1,6 +1,6 @@
 import { createGrammar } from '~/base';
 import { sequence, fork, literal } from '~/expressions';
-import { getAllAsyncGeneratorResults } from './utils';
+import { getAllAsyncGeneratorResults } from '~/utils/generators';
 
 describe('createGrammarParser', () => {
   it('requires parser to be passed', () => {
@@ -103,9 +103,7 @@ describe('createGrammarParser', () => {
       },
       parser: sequence({
         children: [
-          literal({ text: 'foo' }, (data, holder) => {
-            holder.push(data);
-          }), // pushing to reference - not returning
+          literal({ text: 'foo' }, (data, holder) => [...holder, data]), // pushing to reference - not returning
           literal({ text: 'bar' }, (data, holder) => [...holder, data]), // returning different reference
           literal({ text: 'baz' }, (data, holder) => [...holder, data]),
         ],

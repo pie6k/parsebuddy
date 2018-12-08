@@ -4,6 +4,7 @@ import {
   DataHolderConfig,
   Parser,
 } from './parser';
+import { getAllAsyncGeneratorResults } from '~/utils/generators';
 
 export interface GrammarDefinition<DataHolder, Marker> {
   parser: Parser<any, DataHolder, Marker>;
@@ -33,6 +34,7 @@ export function createGrammar<DataHolder, Marker>(
 ) {
   validateGrammarDefinition(grammar);
   const { dataHolder, parser } = grammar;
+
   async function* parse(input: string, options?: GrammarParseOptions) {
     options = { ...defaultParseOptions, ...options };
 
@@ -52,7 +54,12 @@ export function createGrammar<DataHolder, Marker>(
     }
   }
 
+  async function parseAll(input: string, options?: GrammarParseOptions) {
+    return await getAllAsyncGeneratorResults(parse(input, options));
+  }
+
   return {
     parse,
+    parseAll,
   };
 }

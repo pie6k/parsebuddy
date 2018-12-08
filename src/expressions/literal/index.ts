@@ -4,6 +4,7 @@ import {
   ParserOptions,
 } from '~/base/parser';
 import { startsWith, fuzzyMatch } from '~/utils/strings';
+import { ParserExecutorData } from '~/base/parser/parserFactory';
 
 interface LiteralOptions {
   text: string;
@@ -13,7 +14,10 @@ interface LiteralOptions {
 
 async function* parseAsFuzzy(
   branch: ParsingBranch<any, any>,
-  { text, marker, isCaseSensitive }: ParserOptions<LiteralOptions, any, any>,
+  {
+    options: { text, marker, isCaseSensitive },
+    emit,
+  }: ParserExecutorData<LiteralOptions, string>,
 ) {
   const input = branch.getInput();
   const fuzzyMatchData = fuzzyMatch(input, text, { isCaseSensitive });
@@ -21,6 +25,12 @@ async function* parseAsFuzzy(
   if (!fuzzyMatchData) {
     return;
   }
+
+  const fullMatch = fuzzyMatchData
+    .map((fuzzyMatch) => fuzzyMatch.content)
+    .join('');
+
+  emit(branch, fullMatch);
 
   for (const fuzzyMatch of fuzzyMatchData) {
     const { content, type } = fuzzyMatch;
@@ -39,10 +49,11 @@ export const literal = createParserFactory<LiteralOptions, string>(
     const { text, marker, isCaseSensitive, isFuzzy } = options;
 
     if (isFuzzy) {
-      return yield* parseAsFuzzy(branch, options);
+      return yield* parseAsFuzzy(branch, { options, emit });
     }
 
     const input = branch.getInput();
+
     const startsWithResult = startsWith(input, text, {
       caseSensitive: isCaseSensitive,
     });
@@ -58,6 +69,7 @@ export const literal = createParserFactory<LiteralOptions, string>(
       const [matchedInput, suggestionNeededToMatch] = resultWithSuggestion;
       // it is possible that entire match is suggestion
       if (matchedInput) {
+        emit(branch, text);
         branch.addMatch({ content: matchedInput, marker, type: 'input' });
       }
       branch.addMatch({
@@ -68,7 +80,7 @@ export const literal = createParserFactory<LiteralOptions, string>(
       return yield branch;
     }
 
-    emit(text);
+    emit(branch, text);
     yield branch.addMatch({ content: text, marker, type: 'input' });
   },
   {

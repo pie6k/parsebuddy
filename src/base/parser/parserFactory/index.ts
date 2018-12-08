@@ -4,9 +4,16 @@ export {
   createParserFactory,
   DataEmitHandler,
   ParserOptions,
-  ParsingBranch,
-  DataHolderConfig,
   Parser,
+  ParserExecutorData,
 } from './factory';
 
 export { defineParser } from './defineParser';
+
+export {
+  ParsingBranch,
+  ParsingBranchMatch,
+  ParsingBranchResult,
+  DataHolderConfig,
+  ParseMatchType,
+} from './ParsingBranch';

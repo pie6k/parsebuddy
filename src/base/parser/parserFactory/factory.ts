@@ -1,5 +1,4 @@
 import { ParsingBranch } from './ParsingBranch';
-export { ParsingBranch, DataHolderConfig } from './ParsingBranch';
 import { AnyObject } from '~/utils/types';
 
 import { ParsingOptions, defaultParsingOptions } from './parsingOptions';
@@ -20,10 +19,19 @@ interface OptionsBase extends AnyObject {
   children?: never;
 }
 
+interface MatchCallbackData {
+  matchesCount: number;
+}
+
 export interface ChildrenData<DataHolder, Marker> {
+  id?: string;
   children?: Array<Parser<any, DataHolder, Marker>>;
   placeholder?: string;
   marker?: Marker;
+  onMatch?: (
+    brach: ParsingBranch<DataHolder, Marker>,
+    data: MatchCallbackData,
+  ) => void;
 }
 
 const defaultBaseParserData: Partial<ChildrenData<any, any>> = {
@@ -34,9 +42,9 @@ export interface DataEmitHandler<EmitType, DataHolder> {
   (data: EmitType, dataHolder: DataHolder): DataHolder | void;
 }
 
-interface ParserExecutorData<Options, EmitType> {
+export interface ParserExecutorData<Options, EmitType> {
   options: ParserOptions<Options, any, any>;
-  emit: (data: EmitType) => void;
+  emit: (branch: ParsingBranch<any, any>, data: EmitType) => void;
 }
 
 interface ParserExecutor<Options, EmitType> {
@@ -99,7 +107,7 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
       }
 
       // if no more input and parser has placeholder
-      if (!branch.hasMoreInput() && options.placeholder) {
+      if (options.placeholder && branch.shouldApplyPlaceholder()) {
         return yield branch
           .addMatch({
             type: 'placeholder',
@@ -113,21 +121,38 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
         return yield branch.markAsFinished();
       }
 
-      const emit = (data: EmitType) => {
+      const emit = (
+        targetBranch: ParsingBranch<DataHolder, EmitType>,
+        data: EmitType,
+      ) => {
         if (!onEmit) return;
-        const emitResult = onEmit(data, branch.getDataHolder());
+        const emitResult = onEmit(data, targetBranch.getDataHolder());
         if (emitResult !== undefined) {
-          branch.setData(emitResult as DataHolder);
+          targetBranch.setData(emitResult as DataHolder);
         }
       };
 
       branch.pushToParsersStack(parser);
 
+      let matchesCount = 0;
+
       for await (const newBranch of executor(branch, {
         emit,
         options: options,
       })) {
+        matchesCount = matchesCount + 1;
+        options.onMatch && options.onMatch(newBranch, { matchesCount });
         yield newBranch;
+      }
+
+      if (!matchesCount && options.placeholder && !branch.hasMoreInput()) {
+        yield branch
+          .addMatch({
+            type: 'placeholder',
+            marker: options.marker,
+            content: options.placeholder,
+          })
+          .markAsFinished();
       }
 
       branch.popFromParsersStack();

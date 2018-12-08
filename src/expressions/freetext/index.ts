@@ -26,7 +26,7 @@ export const freetext = createParserFactory<FreetextOptions, string>(
       const variantWordsCount = variant.split(' ').length;
       const score = Math.pow(0.975, variantWordsCount + 1);
 
-      emit(variant);
+      emit(branch, variant);
       yield branch
         .clone()
         .addMatch({ content: variant, type: 'input', marker })

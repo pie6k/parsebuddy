@@ -62,7 +62,7 @@ describe('word parser', async () => {
         word({
           children: [
             fork({
-              children: [literal({ text: 'a' }), literal({ text: 'b' })],
+              children: [literal({ text: 'b' }), literal({ text: 'a' })],
             }),
           ],
         }),

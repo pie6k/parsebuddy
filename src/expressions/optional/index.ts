@@ -11,7 +11,7 @@ export const optional = createParserFactory<{}, never>(
       emit,
     },
   ) {
-    yield branch;
+    yield branch.clone();
     yield* child(branch.clone());
   },
   {

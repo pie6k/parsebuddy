@@ -19,6 +19,20 @@ const repeatTest = repeat({
   ],
 });
 
+const repeatTestPlaceholder = repeat({
+  glue: ' and ',
+  children: [
+    fork({
+      placeholder: 'thing',
+      children: [
+        literal({ text: 'foo' }),
+        literal({ text: 'bar' }),
+        literal({ text: 'baz' }),
+      ],
+    }),
+  ],
+});
+
 describe('repeat parser', async () => {
   test('will not allow multiple children', async () => {
     expect(() =>
@@ -56,10 +70,22 @@ describe('repeat parser', async () => {
     expect(results).toEqual(['foo']);
   });
 
-  it('will suggest glue when have first subject matching', async () => {
+  it('will respect placeholder of subject', async () => {
     const results = await getParserResultsMatched(repeatTest, 'foo');
 
-    expect(results).toEqual(['foo', 'foo and ']);
+    expect(results).toEqual([
+      'foo',
+      'foo and foo',
+      'foo and bar',
+      'foo and baz',
+    ]);
+
+    const resultsPlaceholder = await getParserResultsMatched(
+      repeatTestPlaceholder,
+      'foo',
+    );
+
+    expect(resultsPlaceholder).toEqual(['foo', 'foo and thing']);
   });
 
   it('will suggest next repeat possibilities when have glue', async () => {
@@ -94,7 +120,7 @@ describe('repeat parser', async () => {
     ).toHaveLength(0);
     expect(
       await getParserResultsMatched(repeatTestWithLimit, 'foo & foo'),
-    ).toEqual(['foo & foo', 'foo & foo & ']);
+    ).toEqual(['foo & foo', 'foo & foo & foo']);
   });
 
   // TODO: Unique case

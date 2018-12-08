@@ -11,6 +11,7 @@ function verifyAndPrepareBranchForWordStart<Marker>(
 ) {
   const matchedInput = branch.getMatchedInput();
   const input = branch.getInput();
+  const originalInput = branch.getOriginalInput();
 
   // if its brand new branch - we dont require whitespace on start - it's ok
   if (!branch.hasMatches()) {
@@ -25,14 +26,16 @@ function verifyAndPrepareBranchForWordStart<Marker>(
     return;
   }
 
-  if (!input || input.startsWith(' ')) {
-    branch.addMatch({ content: ' ', type: 'whitespace', marker });
+  if (!input) {
+    return branch.addMatch({ content: ' ', type: 'suggestion', marker });
+  }
+
+  if (input.startsWith(' ')) {
+    return branch.addMatch({ content: ' ', type: 'input', marker });
   }
 
   return branch;
 }
-
-function addWhitespaceSuggestionIfNeeded(branch: ParsingBranch<any, any>) {}
 
 function isBranchCorrectWordEnd(branch: ParsingBranch<any, any>) {
   if (!branch.hasMoreInput()) {
@@ -58,20 +61,21 @@ export const word = createParserFactory<WordOptions, string>(
 
     const parser = text ? literal({ text, marker }) : children[0];
 
-    for await (const newBranch of parser(branch.clone())) {
+    for await (const newBranch of parser(preparedBranch.clone())) {
       if (!newBranch.hasMoreInput()) {
+        newBranch.addMatch({ content: ' ', type: 'suggestion', marker });
         yield newBranch;
-      }
-
-      const newBranchInput = newBranch.getInput();
-
-      if (newBranchInput.startsWith(' ')) {
-        yield newBranch.addMatch({ content: ' ', type: 'whitespace', marker });
         continue;
       }
 
       if (newBranch.getMatchedInput().endsWith(' ')) {
         yield newBranch;
+        continue;
+      }
+
+      if (newBranch.getInput().startsWith(' ')) {
+        yield newBranch.addMatch({ content: ' ', type: 'input', marker });
+        continue;
       }
     }
   },
