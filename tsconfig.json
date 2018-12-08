@@ -12,20 +12,13 @@
     "jsx": "react",
     "importHelpers": true,
     "baseUrl": "."
-    // "paths": {
-    //   "~/*": ["./src/*"]
-    // }
   },
   "exclude": [
     "./node_modules/*",
     "./dist",
-    "./**/*.html",
+    "./src/**/*.html",
     "./src/demo",
     "./src/__tests__",
     "./src/**/*.spec.ts"
-  ],
-  "parcel-plugin-typescript": {
-    // If true type-checking is disabled
-    "transpileOnly": false
-  }
+  ]
 }

@@ -101,6 +101,7 @@ const hour = defineParser<{}, number>(
             min: 1,
             max: 12,
             generateSuggestions: true,
+            onlyInteger: true,
           },
           (matchedHour) => {
             hour = matchedHour;
@@ -138,6 +139,7 @@ const ticketsCount = defineParser<{}, number>(
                 min: 2,
                 max: 5,
                 generateSuggestions: true,
+                onlyInteger: true,
               },
               (count) => emit(count),
             ),

@@ -59,13 +59,10 @@ describe('custom parsers', () => {
         }),
       ],
     });
-    const results = await getParserResults(parser, 'ba');
+    const results = await getParserResults(parser, 'bar');
 
-    expect(results).toHaveLength(4);
-
-    for (let result of results) {
-      expect(result.data).toEqual(result.matched);
-    }
+    expect((await getParserResults(parser, 'bar1'))[0].data).toEqual('bar1');
+    expect((await getParserResults(parser, 'bar2'))[0].data).toEqual('bar2');
   });
 
   it('handles properly more advanced custom parser', async () => {

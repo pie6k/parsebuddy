@@ -52,7 +52,7 @@ describe('data emitting', () => {
         }),
       ],
     });
-    const results = await getParserResults(parser, 'a');
+    const results = await getParserResults(parser, 'ace');
 
     for (let result of results) {
       expect(result.matched).toEqual(result.data);

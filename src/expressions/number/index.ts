@@ -92,7 +92,7 @@ export const number = createParserFactory<NumberOptions, number>(
   },
   {
     name: 'number',
-    defaultOptions: { onlyInteger: true },
+    defaultOptions: { onlyInteger: false },
     areOptionsValid: (options) => {
       if (options.generateSuggestions && !options.onlyInteger) {
         throw new Error(

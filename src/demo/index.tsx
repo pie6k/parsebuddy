@@ -7,7 +7,7 @@ import { Result } from './Result';
 import { cinemaGrammar, CinemaGrammarResult } from './grammar';
 
 const Holder = styled.div`
-  font-family: Helvetica Neue, sans-serif;
+  font-family: 'Montserrat', sans-serif;
   max-width: 1400px;
   margin: 100px auto;
   padding: 20px;
@@ -26,12 +26,14 @@ const IntroHolder = styled.div`
 const SearchFormHolder = styled.div``;
 const SearchInput = styled.input`
   display: block;
+  border-radius: 20px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   width: 100%;
   padding: 25px;
   font: inherit;
   font-weight: bold;
-  font-size: 18px;
-  border: 2px solid #ddd;
+  font-size: 20px;
+  border: none;
   outline: none;
   &:focus {
     border-color: #bbb;

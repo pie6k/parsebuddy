@@ -44,15 +44,15 @@ interface PartProps {
 function getMarkerColor(marker: CinemaMarker) {
   switch (marker) {
     case CinemaMarker.movie:
-      return 'red';
+      return '#99b433';
     case CinemaMarker.date:
-      return 'green';
+      return '#7e3878';
     case CinemaMarker.city:
-      return 'orange';
+      return '#603cba';
     case CinemaMarker.ticketsCount:
-      return 'blue';
+      return '#2b5797';
     case CinemaMarker.hour:
-      return 'purple';
+      return '#da532c';
     default:
       return '#000';
   }
