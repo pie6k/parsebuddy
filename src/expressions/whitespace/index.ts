@@ -1,5 +1,5 @@
-import { createParserFactory } from '~/base/parser';
-import { startsWith } from '~/utils/strings';
+import { createParserFactory } from '../../base/parser';
+import { startsWith } from '../../utils/strings';
 
 interface WhitespaceOptions {}
 
@@ -17,8 +17,8 @@ export const whitespace = createParserFactory<WhitespaceOptions, string>(
 
     const [whiteSpacePart] = whiteSpaceMatch;
 
-    emit(whiteSpacePart);
-    yield branch.addMatch({ content: whiteSpacePart, type: 'input' });
+    emit(branch, whiteSpacePart);
+    yield branch.addMatch({ content: whiteSpacePart, type: 'input', marker });
   },
   { name: 'whitespace' },
 );

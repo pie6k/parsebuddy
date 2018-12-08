@@ -1,9 +1,5 @@
-import {
-  createParserFactory,
-  ParsingBranch,
-  ParserExecutorData,
-} from '~/base/parser';
-import { startsWith } from '~/utils/strings';
+import { createParserFactory, ParsingBranch, ParserExecutorData } from '../..';
+import { startsWith } from '../../utils/strings';
 
 import {
   floatNumRegExp,

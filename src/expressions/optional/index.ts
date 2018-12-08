@@ -1,4 +1,4 @@
-import { createParserFactory } from '~/base/parser';
+import { createParserFactory } from '../../base/parser';
 
 export const optional = createParserFactory<{}, never>(
   async function*(

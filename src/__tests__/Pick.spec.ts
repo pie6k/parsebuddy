@@ -1,4 +1,4 @@
-import { pick, literal } from '~/expressions';
+import { pick, literal } from '..';
 import {
   getParserResults,
   getParserResultsCount,

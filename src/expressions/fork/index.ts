@@ -1,4 +1,4 @@
-import { createParserFactory } from '~/base/parser';
+import { createParserFactory } from '../..';
 
 export const fork = createParserFactory<{}, string>(
   async function*(branch, { options: { children: chilrenParsers, marker } }) {

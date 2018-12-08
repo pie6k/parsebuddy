@@ -1,6 +1,6 @@
-import { startsWith, isStringOneOf } from '~/utils/strings';
 import { Parser } from '../factory';
 import { getUniqueId } from './services';
+import { startsWith } from '../../../../utils/strings';
 
 export interface DataHolderConfig<DataHolder> {
   init: () => DataHolder;

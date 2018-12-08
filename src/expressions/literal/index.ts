@@ -2,9 +2,9 @@ import {
   createParserFactory,
   ParsingBranch,
   ParserOptions,
-} from '~/base/parser';
-import { startsWith, fuzzyMatch } from '~/utils/strings';
-import { ParserExecutorData } from '~/base/parser/parserFactory';
+  ParserExecutorData,
+} from '../../base/parser';
+import { startsWith, fuzzyMatch } from '../../utils/strings';
 
 interface LiteralOptions {
   text: string;

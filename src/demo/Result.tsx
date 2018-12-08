@@ -6,7 +6,7 @@ import {
   CinemaMarker,
   CinemaGrammarMatch,
 } from './grammar';
-import { ParseMatchType } from '~/base';
+import { ParseMatchType } from '..';
 
 interface Props {
   result: CinemaGrammarResult;

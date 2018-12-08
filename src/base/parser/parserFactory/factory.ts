@@ -1,7 +1,7 @@
 import { ParsingBranch } from './ParsingBranch';
-import { AnyObject } from '~/utils/types';
 
 import { ParsingOptions, defaultParsingOptions } from './parsingOptions';
+import { AnyObject } from './services';
 
 interface ParserData<Options, EmitType> {
   options: Options;

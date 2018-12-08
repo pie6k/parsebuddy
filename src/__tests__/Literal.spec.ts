@@ -1,4 +1,4 @@
-import { literal, sequence } from '~/expressions';
+import { literal, sequence } from '..';
 import {
   getParserResults,
   getParserResultsMatched,

@@ -1,4 +1,4 @@
-import { createParserFactory, Parser, ParsingBranch } from '~/base/parser';
+import { createParserFactory, Parser, ParsingBranch } from '../../base/parser';
 interface PickOptions {
   limit?: number;
 }

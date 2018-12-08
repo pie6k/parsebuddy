@@ -1,5 +1,5 @@
 // import repeat from './index';
-import { literal, fork, repeat, sequence, word } from '~/expressions';
+import { literal, fork, repeat, sequence, word } from '..';
 import {
   getParserResults,
   getParserResultsCount,

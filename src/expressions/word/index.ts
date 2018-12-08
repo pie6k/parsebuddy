@@ -1,4 +1,4 @@
-import { createParserFactory, ParsingBranch } from '~/base/parser';
+import { createParserFactory, ParsingBranch } from '../../base/parser';
 import { literal } from '../literal';
 
 interface WordOptions {

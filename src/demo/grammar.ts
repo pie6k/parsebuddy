@@ -6,7 +6,7 @@ import {
   fork,
   literal,
   number,
-} from '~/index';
+} from '..';
 import { moviesList } from './movies';
 import { cities } from './cities';
 

@@ -1,7 +1,10 @@
-import { Parser, ParsingBranch } from '~/base/parser';
-import { createGrammar } from '~/base';
-import { GrammarParseOptions } from '~/base/grammar';
-import { getAllAsyncGeneratorResults } from '~/utils/generators';
+import {
+  Parser,
+  ParsingBranch,
+  createGrammar,
+  GrammarParseOptions,
+} from '../..';
+import { getAllAsyncGeneratorResults } from '../../utils/generators';
 
 export async function getParserResults<EmitType, DataHolder, Marker>(
   parser: Parser<EmitType, DataHolder, Marker>,

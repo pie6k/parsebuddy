@@ -1,4 +1,8 @@
-export { GrammarDefinition, createGrammar } from './grammar';
+export {
+  GrammarDefinition,
+  createGrammar,
+  GrammarParseOptions,
+} from './grammar';
 export {
   Parser,
   ParserFactoryOptions,

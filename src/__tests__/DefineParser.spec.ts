@@ -1,6 +1,5 @@
-import { literal, sequence, number, fork, repeat } from '~/expressions';
+import { defineParser, literal, sequence, number, fork, repeat } from '..';
 import { getParserResults } from './utils';
-import { defineParser } from '~/base/parser';
 
 interface PriceOptions {
   currency: 'usd' | 'eur';

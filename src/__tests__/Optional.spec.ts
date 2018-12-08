@@ -1,5 +1,4 @@
-import { createGrammar } from '~/base';
-import { sequence, fork, literal, optional } from '~/expressions';
+import { createGrammar, sequence, fork, literal, optional } from '..';
 import {
   getParserResults,
   getParserResultsCount,

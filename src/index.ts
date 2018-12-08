@@ -8,6 +8,12 @@ export {
   ParsingBranch,
   createParserFactory,
   defineParser,
+  DataEmitHandler,
+  GrammarParseOptions,
+  ParseMatchType,
+  ParserExecutorData,
+  ParsingBranchMatch,
+  ParsingBranchResult,
 } from './base';
 export {
   fork,
@@ -18,4 +24,5 @@ export {
   repeat,
   sequence,
   word,
+  freetext,
 } from './expressions';

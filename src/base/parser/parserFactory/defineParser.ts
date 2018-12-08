@@ -1,4 +1,3 @@
-import { AnyObject } from '~/utils/types';
 import {
   Parser,
   ParserOptions,
@@ -6,7 +5,7 @@ import {
   ParserFactoryOptions,
 } from './factory';
 import { ParsingBranch } from './ParsingBranch';
-// import { fork, literal } from '~/expressions';
+import { AnyObject } from './services';
 
 type Resolvable<Type> = Type | Promise<Type>;
 

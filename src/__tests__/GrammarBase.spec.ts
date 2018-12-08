@@ -1,6 +1,5 @@
-import { createGrammar } from '~/base';
-import { sequence, fork, literal } from '~/expressions';
-import { getAllAsyncGeneratorResults } from '~/utils/generators';
+import { createGrammar, sequence, fork, literal } from '..';
+import { getAllAsyncGeneratorResults } from '../utils/generators';
 
 describe('createGrammarParser', () => {
   it('requires parser to be passed', () => {

@@ -8,7 +8,7 @@ import { cinemaGrammar, CinemaGrammarResult } from './grammar';
 
 const Holder = styled.div`
   font-family: Helvetica Neue, sans-serif;
-  max-width: 900px;
+  max-width: 1400px;
   margin: 100px auto;
   padding: 20px;
   &,
@@ -51,6 +51,8 @@ class Demo extends Component<{}, State> {
     searchTerm: '',
   };
 
+  private input: HTMLInputElement;
+
   search = async (term: string) => {
     this.updateTerm(term);
 
@@ -67,6 +69,8 @@ class Demo extends Component<{}, State> {
 
   updateTerm = (searchTerm: string) => {
     this.setState({ searchTerm });
+    this.input.focus();
+    this.input.setSelectionRange(searchTerm.length, searchTerm.length);
   };
 
   componentDidMount() {
@@ -79,6 +83,7 @@ class Demo extends Component<{}, State> {
       <Holder>
         <SearchFormHolder>
           <SearchInput
+            ref={(input) => (this.input = input)}
             value={searchTerm}
             placeholder="Start with 'buy tickets'..."
             onChange={(event) => this.search(event.target.value)}

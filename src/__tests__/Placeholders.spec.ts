@@ -1,5 +1,4 @@
-import { createGrammar } from '~/base';
-import { sequence, fork, literal } from '~/expressions';
+import { createGrammar, sequence, fork, literal } from '..';
 import { getParserResults, getParserResultsCount } from './utils';
 
 async function getAllAsyncGeneratorResults<T>(

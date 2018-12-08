@@ -6,3 +6,4 @@ export { pick } from './pick';
 export { number } from './number';
 export { optional } from './optional';
 export { word } from './word';
+export { freetext } from './freetext';

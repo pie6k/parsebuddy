@@ -1,5 +1,4 @@
-import { createGrammar } from '~/base';
-import { sequence, fork, literal } from '~/expressions';
+import { sequence, fork, literal, createGrammar } from '..';
 import { getParserResults, getParserResultsCount } from './utils';
 
 const color = fork({

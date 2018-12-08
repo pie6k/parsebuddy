@@ -4,7 +4,7 @@ import {
   DataHolderConfig,
   Parser,
 } from './parser';
-import { getAllAsyncGeneratorResults } from '~/utils/generators';
+import { getAllAsyncGeneratorResults } from '../utils/generators';
 
 export interface GrammarDefinition<DataHolder, Marker> {
   parser: Parser<any, DataHolder, Marker>;

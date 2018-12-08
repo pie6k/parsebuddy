@@ -1,6 +1,5 @@
-import { freetext } from '~/expressions/freetext';
 import { getParserResults, getParserResultsCount } from './utils';
-import { sequence, literal } from '~/expressions';
+import { sequence, literal, freetext } from '..';
 
 const freetextTest = freetext({ splitBy: [' ', ','] });
 const freetextTestWithLimit = freetext({

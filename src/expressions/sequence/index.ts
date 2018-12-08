@@ -1,4 +1,4 @@
-import { createParserFactory, ParsingBranch } from '~/base/parser';
+import { createParserFactory, ParsingBranch } from '../../base/parser';
 
 export const sequence = createParserFactory<{}, string>(
   async function*(branch, { options: { children, marker } }) {

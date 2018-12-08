@@ -1,4 +1,4 @@
-import { createParserFactory } from '~/base/parser';
+import { createParserFactory } from '../..';
 
 import { getSubstringsOfInput } from './services';
 

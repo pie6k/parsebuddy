@@ -1,10 +1,9 @@
-import { number } from '~/expressions/number';
 import {
   getParserResults,
   getParserResultsCount,
   getParserFirstResultData,
 } from './utils';
-import { sequence, literal } from '~/expressions';
+import { sequence, literal, number } from '..';
 
 const numberTest = number();
 const numberLimitTest = number({ max: 30, min: 5 });
