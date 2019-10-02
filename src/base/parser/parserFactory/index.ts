@@ -1,5 +1,5 @@
 export {
-  ChildrenData,
+  ParsingRelatedParserOptions,
   ParserFactoryOptions,
   createParserFactory,
   DataEmitHandler,

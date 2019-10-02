@@ -23,10 +23,8 @@ interface MatchCallbackData {
   matchesCount: number;
 }
 
-export interface ChildrenData<DataHolder, Marker> {
-  id?: string;
+export interface ParsingRelatedParserOptions<DataHolder, Marker> {
   children?: Array<Parser<any, DataHolder, Marker>>;
-  placeholder?: string;
   marker?: Marker;
   onMatch?: (
     brach: ParsingBranch<DataHolder, Marker>,
@@ -34,7 +32,13 @@ export interface ChildrenData<DataHolder, Marker> {
   ) => void;
 }
 
-const defaultBaseParserData: Partial<ChildrenData<any, any>> = {
+export interface BuiltInParserOptions<Options> {
+  id?: string;
+  placeholder?: string;
+  isEnabled?: boolean | ((options: Options) => boolean);
+}
+
+const defaultBaseParserData: Partial<ParsingRelatedParserOptions<any, any>> = {
   marker: null,
 };
 
@@ -58,7 +62,9 @@ export type ParserOptions<
   Options extends AnyObject,
   DataHolder,
   Marker
-> = Options & ChildrenData<DataHolder, Marker>;
+> = Options &
+  ParsingRelatedParserOptions<DataHolder, Marker> &
+  BuiltInParserOptions<Options>;
 
 export interface ParserFactoryOptions<Options> {
   name: string;
@@ -103,6 +109,13 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
     ) {
       parsingOptions = { ...defaultParsingOptions, ...parsingOptions };
       if (branch.isFinished()) {
+        return yield branch;
+      }
+
+      if (
+        options.isEnabled === false ||
+        (typeof options.isEnabled === 'function' && !options.isEnabled(options))
+      ) {
         return yield branch;
       }
 
