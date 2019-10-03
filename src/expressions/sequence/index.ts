@@ -5,10 +5,14 @@ export const sequence = createParserFactory<{}, string>(
     // we start with origin branch, but it may spread on every element of sequence
     let survivingBranches = [branch];
 
+    if (!children) {
+      throw new Error(`Sequence parser requires at least one child parser`);
+    }
+
     // lets iterate over sequence elements
     for (let child of children) {
       // at first assume no branch survived each step
-      let newBranches: ParsingBranch<any, any>[] = [];
+      let newBranches: ParsingBranch[] = [];
       // for every remaining branch
       for (let survivingBranch of survivingBranches) {
         // get all resulting branches and mark them as new branches from this step

@@ -14,15 +14,15 @@ import { fork } from '../fork';
 import { literal } from '../literal';
 
 interface NumberOptions {
-  min?: number;
-  max?: number;
+  min: number;
+  max: number;
   generateSuggestions?: boolean;
   ignoreNegative?: boolean;
   onlyInteger?: boolean;
 }
 
 async function* parseWithSuggestions(
-  branch: ParsingBranch<any, any>,
+  branch: ParsingBranch,
   { options: { min, max }, emit }: ParserExecutorData<NumberOptions, number>,
 ) {
   const input = branch.getInput();
@@ -47,7 +47,7 @@ async function* parseWithSuggestions(
 
     const number = parseFloat(lastMatch.content);
     if (lastMatch.type === 'input') {
-      emit(result, number);
+      emit(number);
     }
     yield result;
   }
@@ -87,7 +87,7 @@ export const number = createParserFactory<NumberOptions, number>(
       return;
     }
 
-    emit(branch, number);
+    emit(number);
     yield branch.addMatch({ content: numAsString, type: 'input', marker });
   },
   {

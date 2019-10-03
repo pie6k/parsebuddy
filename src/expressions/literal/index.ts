@@ -13,7 +13,7 @@ interface LiteralOptions {
 }
 
 async function* parseAsFuzzy(
-  branch: ParsingBranch<any, any>,
+  branch: ParsingBranch,
   {
     options: { text, marker, isCaseSensitive },
     emit,
@@ -30,7 +30,7 @@ async function* parseAsFuzzy(
     .map((fuzzyMatch) => fuzzyMatch.content)
     .join('');
 
-  emit(branch, fullMatch);
+  emit(fullMatch);
 
   for (const fuzzyMatch of fuzzyMatchData) {
     const { content, type } = fuzzyMatch;
@@ -69,7 +69,7 @@ export const literal = createParserFactory<LiteralOptions, string>(
       const [matchedInput, suggestionNeededToMatch] = resultWithSuggestion;
       // it is possible that entire match is suggestion
       if (matchedInput) {
-        emit(branch, text);
+        emit(text);
         branch.addMatch({ content: matchedInput, marker, type: 'input' });
       }
       branch.addMatch({
@@ -80,7 +80,7 @@ export const literal = createParserFactory<LiteralOptions, string>(
       return yield branch;
     }
 
-    emit(branch, text);
+    emit(text);
     yield branch.addMatch({ content: text, marker, type: 'input' });
   },
   {

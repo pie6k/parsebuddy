@@ -1,7 +1,6 @@
 export {
   createParserFactory,
   ParsingBranch,
-  DataHolderConfig,
   Parser,
   defineParser,
   ParserOptions,
@@ -11,4 +10,5 @@ export {
   ParsingBranchMatch,
   ParsingBranchResult,
   ParseMatchType,
+  Marker,
 } from './parserFactory';

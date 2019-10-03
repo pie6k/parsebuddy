@@ -1,14 +1,12 @@
 import { Parser } from '../factory';
 import { getUniqueId } from './services';
+import { createDataHolder, DataHolder } from './dataHolder';
+import { Marker } from './marker';
+export { Marker } from './marker';
+
 import { startsWith } from '../../../../utils/strings';
 
-export interface DataHolderConfig<DataHolder> {
-  init: () => DataHolder;
-  clone: (dataHolder: DataHolder) => DataHolder;
-}
-
-interface ParsingBranchOptions<DataHolder> {
-  dataHolder?: DataHolderConfig<DataHolder>;
+interface ParsingBranchOptions {
   idPrefix?: string;
   input: string;
 }
@@ -20,25 +18,38 @@ export type ParseMatchType =
   | 'placeholder'
   | 'whitespace';
 
-export interface ParsingBranchMatch<Marker> {
+export interface ParsingBranchMatch {
   content: string;
   type: ParseMatchType;
-  marker: Marker;
+  marker?: Marker<any>;
 }
 
-export interface ParsingBranchResult<DataHolder, Marker> {
+export interface ParsingBranchResult {
   suggestion: string;
   matched: string;
-  matches: ParsingBranchMatch<Marker>[];
+  matches: ParsingBranchMatch[];
   score: number;
-  data: DataHolder;
+  dataMap: Map<DataHolder<any>, any>;
 }
 
-export class ParsingBranch<DataHolder, Marker> {
-  constructor(
-    private readonly options: ParsingBranchOptions<DataHolder>,
-    initialize = true,
-  ) {
+let currentlyParsingBranch: ParsingBranch | null = null;
+
+export function getCurrentlyParsingBranch() {
+  return currentlyParsingBranch;
+}
+
+export function setCurrentlyParsingBranch(branch: ParsingBranch) {
+  currentlyParsingBranch = branch;
+}
+
+export function clearCurrentlyParsingBranch() {
+  currentlyParsingBranch = null;
+}
+
+export class ParsingBranch {
+  private dataMap: Map<DataHolder<any>, any> = new Map();
+  private markersMap: Map<Marker<any>, any[]> = new Map();
+  constructor(private readonly options: ParsingBranchOptions) {
     const { input, idPrefix } = options;
     this.id = `${idPrefix ? `${idPrefix}-` : ''}${getUniqueId()}`;
 
@@ -48,39 +59,38 @@ export class ParsingBranch<DataHolder, Marker> {
     if (typeof input !== 'string') {
       throw new Error('ParsingBranch input must be string');
     }
-
-    if (initialize) {
-      this.data = this.getNewDataHolder();
-    }
   }
   private id: string;
   private isFinishedFlag = false;
-  private data: DataHolder;
   private scoreList: number[] = [];
-  private matches: ParsingBranchMatch<Marker>[] = [];
-  private parsersStack: Parser<any, DataHolder, Marker>[] = [];
+  private matches: ParsingBranchMatch[] = [];
+  private parsersStack: Parser<any>[] = [];
   private isBlocked = false;
 
   getId() {
     return this.id;
   }
 
-  clone(): ParsingBranch<DataHolder, Marker> {
-    const clone = new ParsingBranch<DataHolder, Marker>(
-      { ...this.options, idPrefix: this.getId() },
-      false,
-    );
+  clone(): ParsingBranch {
+    const clone = new ParsingBranch({
+      ...this.options,
+      idPrefix: this.getId(),
+    });
     clone.matches = [...this.matches];
     clone.scoreList = [...this.scoreList];
     clone.parsersStack = [...this.parsersStack];
-    clone.setData(this.getDataHolderClone());
+
+    this.dataMap.forEach((dataValue, dataHolderKind) => {
+      clone.setData(dataHolderKind, dataValue);
+    });
+    // clone.setData(this.getDataHolderClone());
 
     // this.isBlocked = true;
 
     return clone;
   }
 
-  pushToParsersStack(parser: Parser<any, DataHolder, Marker>) {
+  pushToParsersStack(parser: Parser<any>) {
     this.parsersStack.push(parser);
     return this;
   }
@@ -112,37 +122,18 @@ export class ParsingBranch<DataHolder, Marker> {
     }
   }
 
-  getNewDataHolder() {
-    const { dataHolder } = this.options;
-    if (!dataHolder) {
-      return null;
-    }
-
-    return dataHolder.init();
-  }
-
-  getDataHolderClone() {
-    const { dataHolder } = this.options;
-    if (this.hasData() && !dataHolder) {
-      this.throwError(
-        'Branch needs instruction about how to clone branch dataholder',
-      );
-    }
-
-    if (!dataHolder) {
-      return null;
-    }
-
-    return dataHolder.clone(this.data);
-  }
-
-  setData(data: DataHolder) {
+  setData<T>(dataHolder: DataHolder<T>, data: T) {
     this.throwIfBlocked();
-    this.data = data;
+    this.dataMap.set(dataHolder, data);
+    // this.data = data;
+  }
+
+  getData<T>(dataHolder: DataHolder<T>) {
+    return this.dataMap.get(dataHolder);
   }
 
   hasData() {
-    return this.data !== null;
+    return this.dataMap.size > 0;
   }
 
   getMatches() {
@@ -210,10 +201,6 @@ export class ParsingBranch<DataHolder, Marker> {
     return this.options.input;
   }
 
-  getDataHolder() {
-    return this.data;
-  }
-
   getInputableMatches() {
     let hasNoInputable = false;
     return this.getMatches().filter((match) => {
@@ -238,13 +225,13 @@ export class ParsingBranch<DataHolder, Marker> {
       .join('');
   }
 
-  getResult(): ParsingBranchResult<DataHolder, Marker> {
+  getResult(): ParsingBranchResult {
     return {
       suggestion: this.getFullSuggestion(),
       matched: this.getMatchedInput(true),
       matches: this.matches,
       score: this.getScore(),
-      data: this.data,
+      dataMap: this.dataMap,
     };
   }
 
@@ -263,13 +250,13 @@ export class ParsingBranch<DataHolder, Marker> {
     return this.getMatches().some((match) => match.type === type);
   }
 
-  addMatch(match: ParsingBranchMatch<Marker>) {
+  addMatch(match: ParsingBranchMatch) {
     this.throwIfBlocked();
-    if (match.marker === undefined) {
-      this.throwError(
-        'marker cannot be undefined when adding match with .addMatch',
-      );
-    }
+    // if (match.marker === undefined) {
+    //   this.throwError(
+    //     'marker cannot be undefined when adding match with .addMatch',
+    //   );
+    // }
     this.validateNewMatch(match);
     this.matches = [...this.matches, match];
     return this;
@@ -292,7 +279,7 @@ export class ParsingBranch<DataHolder, Marker> {
     }, 1);
   }
 
-  validateNewMatch(match: ParsingBranchMatch<Marker>) {
+  validateNewMatch(match: ParsingBranchMatch) {
     const input = this.getInput();
 
     if (match.type !== 'placeholder' && match.content.length === 0) {
@@ -310,9 +297,7 @@ export class ParsingBranch<DataHolder, Marker> {
     // match of type 'input' must perfectly overlay start of remaining input
     if (match.type === 'input' && !isInputStartingWithMatch) {
       this.throwError(
-        `Match added to parsing branch must match remaining input (input: '${input}', match: '${
-          match.content
-        }')`,
+        `Match added to parsing branch must match remaining input (input: '${input}', match: '${match.content}')`,
       );
     }
   }

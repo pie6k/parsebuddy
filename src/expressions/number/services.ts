@@ -11,15 +11,11 @@ export function getPossibleNumbers(min: number, max: number): number[] {
   return Array.from({ length: numbersCount }, (value, index) => min + index);
 }
 
-export function isWithinLimits(
-  number: number,
-  min: number = null,
-  max: number = null,
-) {
-  if (min !== null && number < min) {
+export function isWithinLimits(number: number, min?: number, max?: number) {
+  if (min !== undefined && number < min) {
     return false;
   }
-  if (max !== null && number > max) {
+  if (max !== undefined && number > max) {
     return false;
   }
   return true;

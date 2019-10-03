@@ -1,13 +1,13 @@
-import { createParserFactory, ParsingBranch } from '../../base/parser';
+import { createParserFactory, ParsingBranch, Marker } from '../../base/parser';
 import { literal } from '../literal';
 
 interface WordOptions {
   text?: string;
 }
 
-function verifyAndPrepareBranchForWordStart<Marker>(
-  branch: ParsingBranch<any, Marker>,
-  marker: Marker,
+function verifyAndPrepareBranchForWordStart(
+  branch: ParsingBranch,
+  marker?: Marker,
 ) {
   const matchedInput = branch.getMatchedInput();
   const input = branch.getInput();
@@ -37,7 +37,7 @@ function verifyAndPrepareBranchForWordStart<Marker>(
   return branch;
 }
 
-function isBranchCorrectWordEnd(branch: ParsingBranch<any, any>) {
+function isBranchCorrectWordEnd(branch: ParsingBranch) {
   if (!branch.hasMoreInput()) {
     return true;
   }
@@ -59,7 +59,11 @@ export const word = createParserFactory<WordOptions, string>(
       return;
     }
 
-    const parser = text ? literal({ text, marker }) : children[0];
+    const parser = text ? literal({ text, marker }) : children && children[0];
+
+    if (!parser) {
+      throw new Error(`Word parser requires either text or children option`);
+    }
 
     for await (const newBranch of parser(preparedBranch.clone())) {
       if (!newBranch.hasMoreInput()) {

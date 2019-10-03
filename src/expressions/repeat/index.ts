@@ -53,6 +53,9 @@ export const repeat = createParserFactory<RepeatOptions, never>(
       },
     },
   ) {
+    if (!chilrenParsers || !chilrenParsers[0]) {
+      throw new Error(`Repeat parser requires at least one child parser`);
+    }
     // just subject
     const subject = chilrenParsers[0];
     const glueAsArray = getGlueArray(glue);
@@ -70,9 +73,9 @@ export const repeat = createParserFactory<RepeatOptions, never>(
     // this is nested function that is able to spread result branches more and more with every other repeat.
     // it will stop when limit is reached
     async function* spreadResultsForAnotherRepeat(
-      startBranch: ParsingBranch<any, any>,
-      remainingRepeats: number,
-    ): AsyncIterableIterator<ParsingBranch<any, any>> {
+      startBranch: ParsingBranch,
+      remainingRepeats: number = MAXIMUM_REPEATS_COUNT,
+    ): AsyncIterableIterator<ParsingBranch> {
       if (remainingRepeats <= 1) {
         return;
       }
@@ -116,11 +119,11 @@ export const repeat = createParserFactory<RepeatOptions, never>(
       limit: MAXIMUM_REPEATS_COUNT,
     },
     areOptionsValid: ({ children, limit }) => {
-      if (children.length !== 1) {
+      if (!children || children.length !== 1) {
         throw new Error('Repeat expressions allows only single children.');
       }
 
-      if (limit > MAXIMUM_REPEATS_COUNT) {
+      if (limit && limit > MAXIMUM_REPEATS_COUNT) {
         throw new Error(
           `Repeat count limit is too big. Maximum is ${MAXIMUM_REPEATS_COUNT}`,
         );

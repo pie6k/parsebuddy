@@ -4,8 +4,13 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
-    "strict": false,
-    "lib": ["es2015", "esnext.asynciterable", "dom", "es7"],
+    "strict": true,
+    "lib": [
+      "es2015",
+      "esnext.asynciterable",
+      "dom",
+      "es7"
+    ],
     "downlevelIteration": true,
     "sourceMap": false,
     "allowSyntheticDefaultImports": true,

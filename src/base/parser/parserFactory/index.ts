@@ -14,6 +14,6 @@ export {
   ParsingBranch,
   ParsingBranchMatch,
   ParsingBranchResult,
-  DataHolderConfig,
   ParseMatchType,
+  Marker,
 } from './ParsingBranch';

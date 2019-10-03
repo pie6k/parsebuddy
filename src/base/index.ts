@@ -9,7 +9,7 @@ export {
   createParserFactory,
   defineParser,
   ParsingBranch,
-  DataHolderConfig,
+  Marker,
   ParserOptions,
   DataEmitHandler,
   ParserExecutorData,

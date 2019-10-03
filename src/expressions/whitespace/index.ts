@@ -17,7 +17,7 @@ export const whitespace = createParserFactory<WhitespaceOptions, string>(
 
     const [whiteSpacePart] = whiteSpaceMatch;
 
-    emit(branch, whiteSpacePart);
+    emit(whiteSpacePart);
     yield branch.addMatch({ content: whiteSpacePart, type: 'input', marker });
   },
   { name: 'whitespace' },

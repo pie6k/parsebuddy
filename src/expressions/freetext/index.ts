@@ -19,14 +19,18 @@ export const freetext = createParserFactory<FreetextOptions, string>(
       if (filter && !filter(variant)) {
         continue;
       }
-      if (maxLength > 0 && variant.length > maxLength) {
+      if (
+        maxLength !== undefined &&
+        maxLength > 0 &&
+        variant.length > maxLength
+      ) {
         continue;
       }
 
       const variantWordsCount = variant.split(' ').length;
       const score = Math.pow(0.975, variantWordsCount + 1);
 
-      emit(branch, variant);
+      emit(variant);
       yield branch
         .clone()
         .addMatch({ content: variant, type: 'input', marker })
