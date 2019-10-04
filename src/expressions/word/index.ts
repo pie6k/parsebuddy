@@ -52,14 +52,16 @@ function isBranchCorrectWordEnd(branch: ParsingBranch) {
 }
 
 export const word = createParserFactory<WordOptions, string>(
-  async function*(branch, { options: { children, marker, text } }) {
+  async function*(branch, { options: { children, marker, text }, emit }) {
     const preparedBranch = verifyAndPrepareBranchForWordStart(branch, marker);
 
     if (!preparedBranch) {
       return;
     }
 
-    const parser = text ? literal({ text, marker }) : children && children[0];
+    const parser = text
+      ? literal({ text, marker }, emit)
+      : children && children[0];
 
     if (!parser) {
       throw new Error(`Word parser requires either text or children option`);
