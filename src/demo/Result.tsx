@@ -1,14 +1,13 @@
-import React, { Component } from 'react';
-import { render } from 'react-dom';
+import React from 'react';
 import styled from 'styled-components';
 import {
   CinemaGrammarResult,
   CinemaGrammarMatch,
   ticketDataHolder,
   markers,
+  allMarkers,
 } from './grammar';
 import { ParseMatchType } from '..';
-import { Marker } from '../base';
 
 interface Props {
   result: CinemaGrammarResult;
@@ -39,21 +38,21 @@ const DataHolder = styled.div`
 `;
 
 interface PartProps {
-  marker: typeof markers[0];
+  marker: typeof markers[keyof typeof markers];
   type?: ParseMatchType;
 }
 
-function getMarkerColor(marker: Marker) {
+function getMarkerColor(marker) {
   switch (marker.name) {
-    case CinemaMarker.movie:
+    case markers.movieMarker:
       return '#99b433';
-    case CinemaMarker.date:
+    case markers.dateMarker:
       return '#7e3878';
-    case CinemaMarker.city:
+    case markers.cityMarker:
       return '#603cba';
-    case CinemaMarker.ticketsCount:
+    case markers.ticketsCountMarker:
       return '#2b5797';
-    case CinemaMarker.hour:
+    case markers.hourMarker:
       return '#da532c';
     default:
       return '#000';
@@ -78,22 +77,7 @@ const ResultPart = styled.div`
 function getSuggestionMatches(result: CinemaGrammarResult) {
   const suggestionMatches: CinemaGrammarMatch[] = [];
 
-  let previousMatch: CinemaGrammarMatch;
-
-  for (let match of result.getParts()) {
-    if (match.type === 'suggestion' || match.type === 'placeholder') {
-      if (
-        suggestionMatches.length === 0 &&
-        previousMatch &&
-        previousMatch.type === 'input'
-      ) {
-        suggestionMatches.push(previousMatch);
-      }
-      suggestionMatches.push(match);
-    }
-    previousMatch = match;
-  }
-  return suggestionMatches;
+  return result.getParts(allMarkers);
 }
 
 export function Result({ result, onClick }: Props) {

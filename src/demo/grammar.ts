@@ -26,6 +26,10 @@ export const markers = {
   ticketsCountMarker,
 };
 
+export const allMarkers = Object.keys(markers).map(
+  (markerName: keyof typeof markers) => markers[markerName],
+);
+
 interface TicketsData {
   movie?: string;
   date?: Date;
