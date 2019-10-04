@@ -1,38 +1,32 @@
-import { sequence, fork, literal, createGrammar } from '..';
-import { getParserResults, getParserResultsCount } from './utils';
+import { sequence, fork, literal, createDataHolder } from '..';
+import { getParserResults } from './utils';
 
-const color = fork({
-  marker: 'color',
-  children: [
-    literal({ text: 'foo', marker: 'foo' }),
-    literal({ text: 'bar', marker: 'bar' }),
-  ],
-});
-
-const colorILike = sequence({
-  children: [literal({ text: 'i like ' }), color],
+const stringDataHolder = createDataHolder({
+  init: () => '',
+  clone: (data) => data,
 });
 
 describe('data emitting', () => {
   it('will properly connect data with branches', async () => {
     const parser = fork({
       children: [
-        literal({ text: 'bar' }, (data) => data),
-        literal({ text: 'baz' }, (data) => data),
+        literal({ text: 'bar' }, (data) => {
+          stringDataHolder.set(data);
+        }),
+        literal({ text: 'baz' }, (data) => {
+          stringDataHolder.set(data);
+        }),
       ],
     });
     const [resultBar, resultBaz] = await getParserResults(parser, 'ba');
 
-    expect(resultBar.matched === resultBar.data).toBeTruthy();
-    expect(resultBaz.matched === resultBaz.data).toBeTruthy();
+    expect(resultBar.getData(stringDataHolder)! === 'bar').toBeTruthy();
+    expect(resultBaz.getData(stringDataHolder)! === 'baz').toBeTruthy();
   });
 
   it('will properly connect data with branches in nested scenario', async () => {
-    const dataHandler = (data, holder) => {
-      if (!holder) {
-        return data;
-      }
-      return holder + data;
+    const dataHandler = (data: string) => {
+      stringDataHolder.set((current) => current + data);
     };
 
     const parser = sequence({
@@ -55,7 +49,9 @@ describe('data emitting', () => {
     const results = await getParserResults(parser, 'ace');
 
     for (let result of results) {
-      expect(result.matched).toEqual(result.data);
+      expect(result.getMatchedInput()).toEqual(
+        result.getData(stringDataHolder),
+      );
     }
   });
 });

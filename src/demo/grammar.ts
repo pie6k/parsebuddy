@@ -6,17 +6,25 @@ import {
   fork,
   literal,
   number,
+  createMarker,
+  createDataHolder,
 } from '..';
 import { moviesList } from './movies';
 import { cities } from './cities';
 
-export enum CinemaMarker {
-  movie = 'Movie Name',
-  date = 'Date',
-  city = 'City',
-  hour = 'Hour',
-  ticketsCount = 'Tickets Count',
-}
+const movieMarker = createMarker('Movie Name');
+const dateMarker = createMarker('Date');
+const cityMarker = createMarker('City');
+const hourMarker = createMarker('Hour');
+const ticketsCountMarker = createMarker('Tickets Count');
+
+export const markers = {
+  movieMarker,
+  dateMarker,
+  cityMarker,
+  hourMarker,
+  ticketsCountMarker,
+};
 
 interface TicketsData {
   movie?: string;
@@ -26,6 +34,11 @@ interface TicketsData {
   ticketsCount?: number;
   weekday?: number;
 }
+
+export const ticketDataHolder = createDataHolder<TicketsData>({
+  init: () => ({}),
+  clone: (old) => ({ ...old }),
+});
 
 const movie = defineParser<{}, string>(
   function(options, emit) {
@@ -86,7 +99,6 @@ const hour = defineParser<{}, number>(
 
     return sequence({
       onMatch: () => {
-        console.log({ ampm, hour });
         if (ampm === 'pm') {
           emit(hour + 12);
         }
@@ -158,42 +170,34 @@ export type CinemaGrammarResult = PromiseType<
   ReturnType<typeof cinemaGrammar.parseAll>
 >[0];
 
-export type CinemaGrammarMatch = CinemaGrammarResult['matches'][0];
+export type CinemaGrammarMatch = ReturnType<CinemaGrammarResult['getParts']>[0];
 
-export const cinemaGrammar = createGrammar<TicketsData, CinemaMarker>({
-  dataHolder: {
-    init: () => ({}),
-    clone: (data) => ({ ...data }),
-  },
+export const cinemaGrammar = createGrammar({
   parser: sequence({
     children: [
       word({ text: 'buy tickets for' }),
-      movie(
-        { placeholder: 'movie name', marker: CinemaMarker.movie },
-        (movie, data) => ({ ...data, movie }),
+      movie({ placeholder: 'movie name', marker: movieMarker }, (movie) =>
+        ticketDataHolder.set({ movie }),
       ),
       word({ text: 'in' }),
-      city(
-        { placeholder: 'cinema location', marker: CinemaMarker.city },
-        (city, data) => ({ ...data, city }),
+      city({ placeholder: 'cinema location', marker: cityMarker }, (city) =>
+        ticketDataHolder.set({ city }),
       ),
       word({ text: 'on' }),
-      weekday(
-        { placeholder: 'weekday', marker: CinemaMarker.date },
-        (weekday, data) => ({ ...data, weekday }),
+      weekday({ placeholder: 'weekday', marker: dateMarker }, (weekday) =>
+        ticketDataHolder.set({ weekday }),
       ),
       word({ text: 'at' }),
-      hour(
-        { placeholder: 'hour', marker: CinemaMarker.hour },
-        (hour, data) => ({ ...data, hour }),
+      hour({ placeholder: 'hour', marker: hourMarker }, (hour) =>
+        ticketDataHolder.set({ hour }),
       ),
       word({ text: 'for' }),
       ticketsCount(
         {
           placeholder: 'people count',
-          marker: CinemaMarker.ticketsCount,
+          marker: ticketsCountMarker,
         },
-        (ticketsCount, data) => ({ ...data, ticketsCount }),
+        (ticketsCount) => ticketDataHolder.set({ ticketsCount }),
       ),
     ],
   }),

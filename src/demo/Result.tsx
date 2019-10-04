@@ -3,10 +3,12 @@ import { render } from 'react-dom';
 import styled from 'styled-components';
 import {
   CinemaGrammarResult,
-  CinemaMarker,
   CinemaGrammarMatch,
+  ticketDataHolder,
+  markers,
 } from './grammar';
 import { ParseMatchType } from '..';
+import { Marker } from '../base';
 
 interface Props {
   result: CinemaGrammarResult;
@@ -37,12 +39,12 @@ const DataHolder = styled.div`
 `;
 
 interface PartProps {
-  marker: CinemaMarker;
+  marker: typeof markers[0];
   type?: ParseMatchType;
 }
 
-function getMarkerColor(marker: CinemaMarker) {
-  switch (marker) {
+function getMarkerColor(marker: Marker) {
+  switch (marker.name) {
     case CinemaMarker.movie:
       return '#99b433';
     case CinemaMarker.date:
@@ -78,7 +80,7 @@ function getSuggestionMatches(result: CinemaGrammarResult) {
 
   let previousMatch: CinemaGrammarMatch;
 
-  for (let match of result.matches) {
+  for (let match of result.getParts()) {
     if (match.type === 'suggestion' || match.type === 'placeholder') {
       if (
         suggestionMatches.length === 0 &&
@@ -97,7 +99,7 @@ function getSuggestionMatches(result: CinemaGrammarResult) {
 export function Result({ result, onClick }: Props) {
   const suggestionMatches = getSuggestionMatches(result);
   return (
-    <Holder onClick={() => onClick(result.suggestion)}>
+    <Holder onClick={() => onClick(result.getInputSuggestion())}>
       <MatchesHolder>
         {suggestionMatches.length > 0 && '...'}
         {suggestionMatches.map((match, index) => {
@@ -108,7 +110,9 @@ export function Result({ result, onClick }: Props) {
           );
         })}
       </MatchesHolder>
-      <DataHolder>Result data: {JSON.stringify(result.data)}</DataHolder>
+      <DataHolder>
+        Result data: {JSON.stringify(result.getData(ticketDataHolder))}
+      </DataHolder>
     </Holder>
   );
 }

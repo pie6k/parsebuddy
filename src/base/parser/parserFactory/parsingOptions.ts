@@ -1,4 +1,4 @@
-export { ParsingBranch, DataHolderConfig } from './ParsingBranch';
+export { ParsingBranch } from './ParsingBranch';
 
 export interface ParsingOptions {
   dontParseWithoutInput?: boolean;

@@ -1,8 +1,14 @@
 import { Parser } from '../factory';
 import { getUniqueId } from './services';
-import { createDataHolder, DataHolder } from './dataHolder';
+import {
+  createDataHolder,
+  DataHolder,
+  getDataHolderConfig,
+} from './dataHolder';
 import { Marker } from './marker';
-export { Marker } from './marker';
+export { Marker, createMarker } from './marker';
+export { DataHolder, createDataHolder } from './dataHolder';
+import { ParseResult } from './ParseResult';
 
 import { startsWith } from '../../../../utils/strings';
 
@@ -18,16 +24,16 @@ export type ParseMatchType =
   | 'placeholder'
   | 'whitespace';
 
-export interface ParsingBranchMatch {
+export interface ParsedPart<M extends Marker = any> {
   content: string;
   type: ParseMatchType;
-  marker?: Marker<any>;
+  marker?: M;
 }
 
 export interface ParsingBranchResult {
   suggestion: string;
   matched: string;
-  matches: ParsingBranchMatch[];
+  matches: ParsedPart[];
   score: number;
   dataMap: Map<DataHolder<any>, any>;
 }
@@ -63,7 +69,7 @@ export class ParsingBranch {
   private id: string;
   private isFinishedFlag = false;
   private scoreList: number[] = [];
-  private matches: ParsingBranchMatch[] = [];
+  private matches: ParsedPart[] = [];
   private parsersStack: Parser<any>[] = [];
   private isBlocked = false;
 
@@ -81,11 +87,10 @@ export class ParsingBranch {
     clone.parsersStack = [...this.parsersStack];
 
     this.dataMap.forEach((dataValue, dataHolderKind) => {
-      clone.setData(dataHolderKind, dataValue);
-    });
-    // clone.setData(this.getDataHolderClone());
+      const dataClone = getDataHolderConfig(dataHolderKind).clone(dataValue);
 
-    // this.isBlocked = true;
+      clone.setData(dataHolderKind, dataClone);
+    });
 
     return clone;
   }
@@ -129,7 +134,7 @@ export class ParsingBranch {
   }
 
   getData<T>(dataHolder: DataHolder<T>) {
-    return this.dataMap.get(dataHolder);
+    return this.dataMap.get(dataHolder) as T;
   }
 
   hasData() {
@@ -225,16 +230,6 @@ export class ParsingBranch {
       .join('');
   }
 
-  getResult(): ParsingBranchResult {
-    return {
-      suggestion: this.getFullSuggestion(),
-      matched: this.getMatchedInput(true),
-      matches: this.matches,
-      score: this.getScore(),
-      dataMap: this.dataMap,
-    };
-  }
-
   isFinished() {
     if (this.isFinishedFlag) {
       return true;
@@ -250,7 +245,7 @@ export class ParsingBranch {
     return this.getMatches().some((match) => match.type === type);
   }
 
-  addMatch(match: ParsingBranchMatch) {
+  addMatch(match: ParsedPart) {
     this.throwIfBlocked();
     // if (match.marker === undefined) {
     //   this.throwError(
@@ -279,7 +274,18 @@ export class ParsingBranch {
     }, 1);
   }
 
-  validateNewMatch(match: ParsingBranchMatch) {
+  convertToResult() {
+    return new ParseResult({
+      score: this.getScore(),
+      input: this.getInput(),
+      inputableMatchedParts: this.getInputableMatches(),
+      dataMap: this.dataMap,
+      matchedParts: this.matches,
+      matchedInput: this.getMatchedInput(),
+    });
+  }
+
+  validateNewMatch(match: ParsedPart) {
     const input = this.getInput();
 
     if (match.type !== 'placeholder' && match.content.length === 0) {

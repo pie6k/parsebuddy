@@ -1,5 +1,6 @@
 import { createGrammar, sequence, fork, literal } from '..';
 import { getAllAsyncGeneratorResults } from '../utils/generators';
+import { createDataHolder } from '../base';
 
 describe('createGrammarParser', () => {
   it('requires parser to be passed', () => {
@@ -37,28 +38,27 @@ describe('createGrammarParser', () => {
   });
 
   it('will properly pass initialized data', async () => {
-    const grammar = createGrammar<string, string>({
-      dataHolder: {
-        init: () => 'foo',
-        clone: (foo) => foo,
-      },
-      parser: literal({ text: 'bar' }, (bar, foo) => `${foo}-${bar}`),
+    const testData = createDataHolder({ init: () => 'foo', clone: (d) => d });
+    const grammar = createGrammar({
+      parser: literal({ text: 'bar' }, (bar) =>
+        testData.set((old) => old + bar),
+      ),
     });
 
     const results = await getAllAsyncGeneratorResults(grammar.parse('bar'));
 
-    expect(results[0].data).toBe('foo-bar');
+    expect(results[0].getData(testData)).toBe('foobar');
   });
 
   it('will initialized to null when no initializator provided', async () => {
     const spy = jest.fn();
-    const grammar = createGrammar<string, string>({
+    const grammar = createGrammar({
       parser: literal({ text: 'bar' }, spy),
     });
 
     const results = await getAllAsyncGeneratorResults(grammar.parse('bar'));
 
-    expect(spy).toBeCalledWith('bar', null);
+    expect(spy).toBeCalledWith('bar');
   });
 
   it('will spread results for forked grammar', async () => {
@@ -83,28 +83,23 @@ describe('createGrammarParser', () => {
     // ).toHaveLength(1);
   });
 
-  it('will emit data to result', async () => {
-    const grammar = createGrammar<string, any>({
-      parser: literal({ text: 'foo' }, (data) => `${data}-${data}`),
-    });
-
-    const results = await getAllAsyncGeneratorResults(grammar.parse('foo'));
-    const [result] = results;
-
-    expect(result.data).toBe('foo-foo');
-  });
-
   it('will pass previous data to next parsers when returned', async () => {
-    const grammar = createGrammar<string[], any>({
-      dataHolder: {
-        init: () => [],
-        clone: (a) => [...a],
-      },
+    const testData = createDataHolder({
+      init: () => [] as string[],
+      clone: (old) => [...old],
+    });
+    const grammar = createGrammar({
       parser: sequence({
         children: [
-          literal({ text: 'foo' }, (data, holder) => [...holder, data]), // pushing to reference - not returning
-          literal({ text: 'bar' }, (data, holder) => [...holder, data]), // returning different reference
-          literal({ text: 'baz' }, (data, holder) => [...holder, data]),
+          literal({ text: 'foo' }, (data) =>
+            testData.set((old) => [...old, data]),
+          ), // pushing to reference - not returning
+          literal({ text: 'bar' }, (data) =>
+            testData.set((old) => [...old, data]),
+          ), // returning different reference
+          literal({ text: 'baz' }, (data) =>
+            testData.set((old) => [...old, data]),
+          ),
         ],
       }),
     });
@@ -114,6 +109,6 @@ describe('createGrammarParser', () => {
     );
     const [result] = results;
 
-    expect(result.data).toEqual(['foo', 'bar', 'baz']);
+    expect(result.getData(testData)).toEqual(['foo', 'bar', 'baz']);
   });
 });

@@ -11,18 +11,6 @@ async function getAllAsyncGeneratorResults<T>(
   return results;
 }
 
-const color = fork({
-  marker: 'color',
-  children: [
-    literal({ text: 'foo', marker: 'foo' }),
-    literal({ text: 'bar', marker: 'bar' }),
-  ],
-});
-
-const colorILike = sequence({
-  children: [literal({ text: 'i like ' }), color],
-});
-
 describe('placeholders', () => {
   it('will not execute children when parent has placeholder and there is no more content', async () => {
     const results = await getParserResults(
@@ -38,9 +26,12 @@ describe('placeholders', () => {
     );
 
     expect(results).toHaveLength(1);
-    expect(results[0].matches).toHaveLength(1);
-    expect(results[0].matches[0]).toHaveProperty('type', 'placeholder');
-    expect(results[0].matches[0]).toHaveProperty('content', 'foo bar or baz');
+    expect(results[0].getParts()).toHaveLength(1);
+    expect(results[0].getParts()[0]).toHaveProperty('type', 'placeholder');
+    expect(results[0].getParts()[0]).toHaveProperty(
+      'content',
+      'foo bar or baz',
+    );
   });
 
   it('will add placeholders when there is no input and placeholder prop is set', async () => {
@@ -58,12 +49,12 @@ describe('placeholders', () => {
     expect(results.length).toBe(3);
     expect(
       results.map((result) => {
-        return result.matches[0].content;
+        return result.getParts()[0].content;
       }),
     ).toEqual(['a', 'b', 'c']);
     expect(
       results.every((result) => {
-        return result.matches[0].type === 'placeholder';
+        return result.getParts()[0].type === 'placeholder';
       }),
     ).toBe(true);
   });
@@ -80,6 +71,6 @@ describe('placeholders', () => {
     );
 
     expect(results.length).toBe(1);
-    expect(results[0].matches.length).toBe(1);
+    expect(results[0].getParts().length).toBe(1);
   });
 });

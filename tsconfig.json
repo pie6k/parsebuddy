@@ -4,7 +4,7 @@
     "module": "commonjs",
     "declaration": true,
     "outDir": "./dist",
-    "strict": true,
+    "strict": false,
     "lib": [
       "es2015",
       "esnext.asynciterable",

@@ -1,22 +1,20 @@
-import { ParsingBranch } from './index';
+import { ParsingBranch, createDataHolder } from './index';
 
 interface TestDataHolder {
   foo: string;
 }
 
 function getTestBranch() {
-  return new ParsingBranch<TestDataHolder, any>({
+  return new ParsingBranch({
     input: 'foo bar baz',
-    dataHolder: {
-      init: () => ({
-        foo: 'bar',
-      }),
-      clone: (foo) => ({ ...foo }),
-    },
   });
 }
 
 describe('ParsingBranch', () => {
+  const stringData = createDataHolder({
+    init: () => '',
+    clone: (data) => data,
+  });
   it('requires correct input to be passed', () => {
     expect(() => {
       new (ParsingBranch as any)();
@@ -26,19 +24,6 @@ describe('ParsingBranch', () => {
         input: undefined,
       });
     }).toThrow();
-  });
-
-  it('properly initializes data', () => {
-    expect(getTestBranch().getDataHolder().foo).toBe('bar');
-  });
-
-  it('properly clones data object', () => {
-    const branch = getTestBranch();
-    const originalData = branch.getDataHolder();
-    const cloneData = branch.clone().getDataHolder();
-
-    expect(originalData).not.toBe(cloneData);
-    expect(originalData).toEqual(cloneData);
   });
 
   it('properly gets input without matches', () => {

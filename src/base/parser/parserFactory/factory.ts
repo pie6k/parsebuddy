@@ -35,8 +35,11 @@ export interface BuiltInParserOptions<Options> {
   isEnabled?: boolean | ((options: Options) => boolean);
 }
 
-const defaultBaseParserData: Partial<ParsingRelatedParserOptions> = {
+const defaultBaseParserData: Partial<
+  ParsingRelatedParserOptions & BuiltInParserOptions<any>
+> = {
   marker: undefined,
+  isEnabled: true,
 };
 
 export interface DataEmitHandler<EmitType> {
@@ -86,13 +89,13 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
     onEmit?: DataEmitHandler<EmitType>,
   ): Parser<EmitType> {
     // apply default options
-    const fullOptions = Object.assign(
+    const parserDefaultOptions: ParserOptions<Options> = Object.assign(
       {},
       defaultBaseParserData,
       factoryOptions.defaultOptions || {},
       options,
     );
-    validateOptions(fullOptions, factoryOptions);
+    validateOptions(parserDefaultOptions, factoryOptions);
 
     async function* parser(
       branch: ParsingBranch,
@@ -103,21 +106,23 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
         return yield branch;
       }
 
+      const { isEnabled } = parserDefaultOptions;
+
       if (
-        fullOptions.isEnabled === false ||
-        (typeof fullOptions.isEnabled === 'function' &&
-          !fullOptions.isEnabled(fullOptions))
+        isEnabled !== undefined &&
+        (isEnabled === false ||
+          (typeof isEnabled === 'function' && !isEnabled(options)))
       ) {
         return yield branch;
       }
 
       // if no more input and parser has placeholder
-      if (fullOptions.placeholder && branch.shouldApplyPlaceholder()) {
+      if (parserDefaultOptions.placeholder && branch.shouldApplyPlaceholder()) {
         return yield branch
           .addMatch({
             type: 'placeholder',
-            marker: fullOptions.marker,
-            content: fullOptions.placeholder,
+            marker: parserDefaultOptions.marker,
+            content: parserDefaultOptions.placeholder,
           })
           .markAsFinished();
       }
@@ -127,8 +132,7 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
       }
 
       const emit = (data: EmitType) => {
-        if (!onEmit) return;
-        const emitResult = onEmit(data);
+        onEmit && onEmit(data);
       };
 
       branch.pushToParsersStack(parser);
@@ -139,24 +143,27 @@ export function createParserFactory<Options extends OptionsBase, EmitType>(
 
       for await (const newBranch of executor(branch, {
         emit,
-        options: fullOptions,
+        options: parserDefaultOptions,
       })) {
         matchesCount = matchesCount + 1;
-        fullOptions.onMatch && fullOptions.onMatch();
+        parserDefaultOptions.onMatch && parserDefaultOptions.onMatch();
         yield newBranch;
       }
 
-      if (!matchesCount && fullOptions.placeholder && !branch.hasMoreInput()) {
+      if (
+        !matchesCount &&
+        parserDefaultOptions.placeholder &&
+        !branch.hasMoreInput()
+      ) {
         yield branch
           .addMatch({
             type: 'placeholder',
-            marker: fullOptions.marker,
-            content: fullOptions.placeholder,
+            marker: parserDefaultOptions.marker,
+            content: parserDefaultOptions.placeholder,
           })
           .markAsFinished();
       }
 
-      setCurrentlyParsingBranch(branch);
       branch.popFromParsersStack();
     }
 

@@ -14,16 +14,34 @@ function computeNewData<T>(oldData: T, dataSetter: DataHolderSetter<T>): T {
   return dataSetter;
 }
 
-export function createDataHolder<T>(): DataHolder<T> {
-  function handleSetData(data: DataHolderSetter<T>) {
+interface DataHolderConfig<T> {
+  init: () => T;
+  clone: (old: T) => T;
+}
+
+const dataHolderConfigMap = new Map<DataHolder<any>, DataHolderConfig<any>>();
+
+export function getDataHolderConfig<T>(dataHolder: DataHolder<T>) {
+  return dataHolderConfigMap.get(dataHolder) as DataHolderConfig<T>;
+}
+
+export function createDataHolder<T>(
+  config: DataHolderConfig<T>,
+): DataHolder<T> {
+  function handleSetData(dataRecipe: DataHolderSetter<T>) {
     const branch = getCurrentlyParsingBranch();
 
     if (!branch) {
       throw new Error(`Setting data to branch is only possible during parsing`);
     }
-    const currentData = branch.getData(dataHolderRef);
+    let currentData = branch.getData(dataHolderRef);
 
-    const newData = computeNewData(currentData, data);
+    if (currentData === undefined) {
+      currentData = config.init();
+    }
+
+    const newData = computeNewData(currentData, dataRecipe);
+
     branch.setData<T>(dataHolderRef, newData);
   }
 
@@ -32,6 +50,8 @@ export function createDataHolder<T>(): DataHolder<T> {
       handleSetData(data);
     },
   };
+
+  dataHolderConfigMap.set(dataHolderRef, config);
 
   return dataHolderRef;
 }

@@ -15,18 +15,6 @@ async function getAllAsyncGeneratorResults<T>(
   return results;
 }
 
-const color = fork({
-  marker: 'color',
-  children: [
-    literal({ text: 'foo', marker: 'foo' }),
-    literal({ text: 'bar', marker: 'bar' }),
-  ],
-});
-
-const colorILike = sequence({
-  children: [literal({ text: 'i like ' }), color],
-});
-
 describe('optional', () => {
   it('will pass child and allow to skip it', async () => {
     const parser = sequence({

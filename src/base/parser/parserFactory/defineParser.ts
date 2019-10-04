@@ -10,10 +10,9 @@ import { AnyObject } from './services';
 type Resolvable<Type> = Type | Promise<Type>;
 
 interface CustomParserDefinitionCreator<Options, EmitType> {
-  (
-    options: ParserOptions<Options, any, any>,
-    emit: (data: EmitType) => void,
-  ): Resolvable<Parser<EmitType, any, any>>;
+  (options: ParserOptions<Options>, emit: (data: EmitType) => void): Resolvable<
+    Parser<EmitType>
+  >;
 }
 
 export function defineParser<Options extends AnyObject, EmitType>(
@@ -40,7 +39,7 @@ export function defineParser<Options extends AnyObject, EmitType>(
     for await (const resultBranch of parser(branch)) {
       for (let emittedData of emitBuffer) {
         // use default parser factory emit callback that will handle everything
-        emit(resultBranch, emittedData);
+        emit(emittedData);
       }
 
       // clear the buffer before next possible branch will be generated

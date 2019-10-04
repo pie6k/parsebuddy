@@ -1,5 +1,6 @@
 import { defineParser, literal, sequence, number, fork, repeat } from '..';
 import { getParserResults } from './utils';
+import { createDataHolder } from '../base';
 
 interface PriceOptions {
   currency: 'usd' | 'eur';
@@ -9,7 +10,7 @@ const price = defineParser<PriceOptions, number>(
   function({ currency }, emit) {
     return sequence({
       children: [
-        number({ ignoreNegative: true, max: 100 }, (data) => emit(data)),
+        number({ max: 100, min: 0 }, (data) => emit(data)),
         literal({ text: currency }),
       ],
     });
@@ -25,27 +26,30 @@ describe('custom parsers', () => {
   });
 
   it('custom parsers is properly emiting data', async () => {
+    const stringDataHolder = createDataHolder({
+      init: () => {
+        return '';
+      },
+      clone: (data) => {
+        return data;
+      },
+    });
     const customParser = defineParser<{}, string>(
       function(options, emit) {
         return fork({
           children: [
-            literal({ text: 'bar' }, (data) => {
-              emit(data);
-            }),
-            literal({ text: 'baz' }, (data) => {
-              emit(data);
-            }),
+            literal({ text: 'bar' }, emit),
+            literal({ text: 'baz' }, emit),
           ],
         });
       },
       { name: 'customParser' },
     );
 
-    const dataCallback = (data: string, holder: string) => {
-      if (holder === null) {
-        return data;
-      }
-      return holder + data;
+    const dataCallback = (data: string) => {
+      stringDataHolder.set((oldData) => {
+        return oldData + data;
+      });
     };
 
     const parser = sequence({
@@ -61,8 +65,12 @@ describe('custom parsers', () => {
     });
     const results = await getParserResults(parser, 'bar');
 
-    expect((await getParserResults(parser, 'bar1'))[0].data).toEqual('bar1');
-    expect((await getParserResults(parser, 'bar2'))[0].data).toEqual('bar2');
+    expect(
+      (await getParserResults(parser, 'bar1'))[0].getData(stringDataHolder),
+    ).toEqual('bar1');
+    expect(
+      (await getParserResults(parser, 'bar2'))[0].getData(stringDataHolder),
+    ).toEqual('bar2');
   });
 
   it('handles properly more advanced custom parser', async () => {
@@ -70,20 +78,25 @@ describe('custom parsers', () => {
       fruitsCount: number;
     }
 
+    const fruitsCountDataHolder = createDataHolder({
+      init: () => 0,
+      clone: (data) => data,
+    });
+
     const fruitsList = defineParser<{}, FruitsListData>(
       function(options, emit) {
         let count = 0;
         return repeat({
           glue: ' and ',
           limit: 3,
-          onMatch: (a) => {
+          onMatch: () => {
             emit({ fruitsCount: count });
           },
           children: [
             fork({
               // marker: 'fruit',
-              onMatch: (branch) => {
-                count++;
+              onMatch: () => {
+                fruitsCountDataHolder.set((count) => count + 1);
               },
               children: [
                 literal({ text: 'banana' }),
@@ -107,7 +120,7 @@ describe('custom parsers', () => {
     );
 
     expect(results).toHaveLength(1);
-    expect(results[0].data).toEqual({ fruitsCount: 3 });
+    expect(results[0].getData(fruitsCountDataHolder)).toEqual(3);
 
     const resultsShort = await getParserResults(
       parser,
@@ -115,6 +128,6 @@ describe('custom parsers', () => {
     );
 
     expect(resultsShort).toHaveLength(1);
-    expect(resultsShort[0].data).toEqual({ fruitsCount: 2 });
+    expect(resultsShort[0].getData(fruitsCountDataHolder)).toEqual(2);
   });
 });

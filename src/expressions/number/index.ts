@@ -17,7 +17,6 @@ interface NumberOptions {
   min: number;
   max: number;
   generateSuggestions?: boolean;
-  ignoreNegative?: boolean;
   onlyInteger?: boolean;
 }
 
@@ -55,14 +54,7 @@ async function* parseWithSuggestions(
 
 export const number = createParserFactory<NumberOptions, number>(
   async function*(branch, { options, emit }) {
-    const {
-      marker,
-      min,
-      max,
-      onlyInteger,
-      ignoreNegative,
-      generateSuggestions,
-    } = options;
+    const { marker, min, max, onlyInteger, generateSuggestions } = options;
 
     if (onlyInteger && generateSuggestions) {
       return yield* parseWithSuggestions(branch, { options, emit });
@@ -78,10 +70,6 @@ export const number = createParserFactory<NumberOptions, number>(
 
     const [numAsString] = numberMatch;
     const number = parseFloat(unifyNumberStringForParsing(numAsString));
-
-    if (ignoreNegative && number < 0) {
-      return;
-    }
 
     if (!isWithinLimits(number, min, max)) {
       return;

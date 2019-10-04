@@ -102,9 +102,9 @@ describe('freetext parser', () => {
   test('will handle freetext that could be also parsed by following parsers', async () => {
     const parser = sequence({
       children: [
-        literal({ marker: 'intro', text: 'my name is ' }),
-        freetext({ marker: 'name' }),
-        literal({ marker: 'outro', text: ' foo' }),
+        literal({ text: 'my name is ' }),
+        freetext(),
+        literal({ text: ' foo' }),
       ],
     });
     expect(
@@ -158,7 +158,7 @@ describe('freetext parser', () => {
 
     const [firstResult] = results;
 
-    expect(firstResult.matches.length).toBe(1);
-    expect(firstResult.matches[0].content).toBe('test');
+    expect(firstResult.getParts()).toHaveLength(1);
+    expect(firstResult.getParts()[0].content).toBe('test');
   });
 });

@@ -1,14 +1,8 @@
-import {
-  ParsingBranch,
-  createParserFactory,
-  DataHolderConfig,
-  Parser,
-} from './parser';
+import { ParsingBranch, Parser } from './parser';
 import { getAllAsyncGeneratorResults } from '../utils/generators';
 
-export interface GrammarDefinition<DataHolder, Marker> {
-  parser: Parser<any, DataHolder, Marker>;
-  dataHolder?: DataHolderConfig<DataHolder>;
+export interface GrammarDefinition {
+  parser: Parser<any>;
 }
 
 export interface GrammarParseOptions {
@@ -17,29 +11,24 @@ export interface GrammarParseOptions {
 }
 
 const defaultParseOptions: GrammarParseOptions = {
-  maxResults: null,
+  maxResults: undefined,
   requireEntireInputToBeParsed: true,
 };
 
-function validateGrammarDefinition<DataHolder, Marker>(
-  definition: GrammarDefinition<DataHolder, Marker>,
-) {
+function validateGrammarDefinition(definition: GrammarDefinition) {
   if (!definition.parser) {
     throw new Error('Parser is required for grammar');
   }
 }
 
-export function createGrammar<DataHolder, Marker>(
-  grammar: GrammarDefinition<DataHolder, Marker>,
-) {
+export function createGrammar(grammar: GrammarDefinition) {
   validateGrammarDefinition(grammar);
-  const { dataHolder, parser } = grammar;
+  const { parser } = grammar;
 
   async function* parse(input: string, options?: GrammarParseOptions) {
     options = { ...defaultParseOptions, ...options };
 
-    const startBranch = new ParsingBranch<DataHolder, Marker>({
-      dataHolder,
+    const startBranch = new ParsingBranch({
       input,
     });
     for await (const resultBranch of parser(startBranch)) {
@@ -49,7 +38,7 @@ export function createGrammar<DataHolder, Marker>(
         continue;
       }
 
-      const resultData = resultBranch.getResult();
+      const resultData = resultBranch.convertToResult();
       yield resultData;
     }
   }

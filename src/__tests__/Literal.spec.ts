@@ -2,7 +2,6 @@ import { literal, sequence } from '..';
 import {
   getParserResults,
   getParserResultsMatched,
-  getParserFirstResultData,
   getParserFirstResult,
 } from './utils';
 
@@ -19,17 +18,17 @@ describe('literal expression', () => {
 
   it('pass empty string as suggestion', async () => {
     const [result] = await getParserResults(literal({ text: 'foo' }), '');
-    expect(result.matches).toHaveLength(1);
-    expect(result.matches[0].content).toBe('foo');
-    expect(result.matches[0].type).toBe('suggestion');
+    expect(result.getParts()).toHaveLength(1);
+    expect(result.getParts()[0].content).toBe('foo');
+    expect(result.getParts()[0].type).toBe('suggestion');
   });
 
   it('to add proper suggestion', async () => {
     const results = await getParserResults(literal({ text: 'foo' }), 'fo');
     expect(results).toHaveLength(1);
 
-    expect(results[0].matches).toHaveLength(2);
-    expect(results[0].matches[1].type).toBe('suggestion');
+    expect(results[0].getParts()).toHaveLength(2);
+    expect(results[0].getParts()[1].type).toBe('suggestion');
   });
 
   it('to be case insensitive by default', async () => {
@@ -39,8 +38,8 @@ describe('literal expression', () => {
 
   it('to pass original case when case insensitive', async () => {
     const results = await getParserResults(literal({ text: 'FoO' }), 'fo');
-    expect(results[0].matches[0].content).toBe('Fo');
-    expect(results[0].matches[1].content).toBe('O');
+    expect(results[0].getParts()[0].content).toBe('Fo');
+    expect(results[0].getParts()[1].content).toBe('O');
   });
 
   it('to be case sensitive when required', async () => {
@@ -99,17 +98,17 @@ describe('literal expression - fuzzy mode', () => {
     });
     const [result] = await getParserResults(anotherParser, 'my name is sj de');
 
-    const matches = result.matches;
+    const matches = result.getParts();
 
     expect(matches).toEqual([
-      { content: 'my name is ', type: 'input', marker: null },
-      { content: 's', type: 'input', marker: null },
-      { content: 'ir ', type: 'fuzzy', marker: null },
-      { content: 'j', type: 'input', marker: null },
-      { content: 'ohn', type: 'fuzzy', marker: null },
-      { content: ' d', type: 'input', marker: null },
-      { content: 'o', type: 'fuzzy', marker: null },
-      { content: 'e', type: 'input', marker: null },
+      { content: 'my name is ', type: 'input', marker: undefined },
+      { content: 's', type: 'input', marker: undefined },
+      { content: 'ir ', type: 'fuzzy', marker: undefined },
+      { content: 'j', type: 'input', marker: undefined },
+      { content: 'ohn', type: 'fuzzy', marker: undefined },
+      { content: ' d', type: 'input', marker: undefined },
+      { content: 'o', type: 'fuzzy', marker: undefined },
+      { content: 'e', type: 'input', marker: undefined },
     ]);
   });
 
@@ -135,6 +134,8 @@ describe('literal expression - fuzzy mode', () => {
   it('will have higher score for less fuzzy results', async () => {
     const acurateResult = await getParserFirstResult(johnDoe, 'sir joh doe');
     const lessAcurateResult = await getParserFirstResult(johnDoe, 'sh do');
-    expect(acurateResult.score).toBeGreaterThan(lessAcurateResult.score);
+    expect(acurateResult.getScore()).toBeGreaterThan(
+      lessAcurateResult.getScore(),
+    );
   });
 });

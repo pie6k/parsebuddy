@@ -1,18 +1,6 @@
 // import repeat from './index';
-import { literal, fork, repeat, sequence, word } from '..';
-import {
-  getParserResults,
-  getParserResultsCount,
-  getParserResultsMatched,
-} from './utils';
-
-const wordsSequence = sequence({
-  children: [
-    word({ text: 'foo' }),
-    word({ text: 'bar' }),
-    word({ text: 'baz' }),
-  ],
-});
+import { literal, fork, sequence, word } from '..';
+import { getParserResults } from './utils';
 
 describe('word parser', async () => {
   test('will parse sequence of words properly', async () => {
