@@ -1,16 +1,6 @@
 import { createGrammar, sequence, fork, literal } from '..';
 import { getParserResults, getParserResultsCount } from './utils';
 
-async function getAllAsyncGeneratorResults<T>(
-  generator: AsyncIterableIterator<T>,
-) {
-  const results: T[] = [];
-  for await (const result of generator) {
-    results.push(result);
-  }
-  return results;
-}
-
 describe('placeholders', () => {
   it('will not execute children when parent has placeholder and there is no more content', async () => {
     const results = await getParserResults(

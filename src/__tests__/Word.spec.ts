@@ -2,7 +2,7 @@
 import { literal, fork, sequence, word } from '..';
 import { getParserResults } from './utils';
 
-describe('word parser', async () => {
+describe('word parser', () => {
   test('will parse sequence of words properly', async () => {
     const parser = sequence({
       children: [

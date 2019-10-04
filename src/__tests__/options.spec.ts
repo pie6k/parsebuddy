@@ -2,7 +2,7 @@ import { sequence, word } from '..';
 import { getParserResults } from './utils';
 import { createMarker } from '../base';
 
-describe('parser options', async () => {
+describe('parser options', () => {
   test('will skip disabled parsers', async () => {
     const parser = sequence({
       children: [

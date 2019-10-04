@@ -22,7 +22,7 @@ const pickWithLimitTest = pick({
   ],
 });
 
-describe('pick parser', async () => {
+describe('pick parser', () => {
   test('will pass many items', async () => {
     expect(await getParserResultsMatched(pickTest, 'ba')).toHaveLength(10);
     expect(await getParserResultsMatched(pickTest, 'fo')).toHaveLength(5);

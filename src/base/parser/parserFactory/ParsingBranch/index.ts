@@ -9,6 +9,9 @@ import { Marker } from './marker';
 export { Marker, createMarker } from './marker';
 export { DataHolder, createDataHolder } from './dataHolder';
 import { ParseResult } from './ParseResult';
+import { Context } from './context';
+
+export { createContext, Context } from './context';
 
 import { startsWith } from '../../../../utils/strings';
 
@@ -54,6 +57,7 @@ export function clearCurrentlyParsingBranch() {
 
 export class ParsingBranch {
   private dataMap: Map<DataHolder<any>, any> = new Map();
+  private contextMap: Map<Context<any>, any> = new Map();
   private markersMap: Map<Marker<any>, any[]> = new Map();
   constructor(private readonly options: ParsingBranchOptions) {
     const { input, idPrefix } = options;
@@ -91,6 +95,8 @@ export class ParsingBranch {
 
       clone.setData(dataHolderKind, dataClone);
     });
+
+    clone.contextMap = this.contextMap;
 
     return clone;
   }
@@ -139,6 +145,16 @@ export class ParsingBranch {
 
   hasData() {
     return this.dataMap.size > 0;
+  }
+
+  setContext<T>(context: Context<T>, data: T) {
+    this.contextMap.set(context, data);
+  }
+
+  getContext<T>(context: Context<T>) {
+    const value: T = this.contextMap.get(context);
+
+    return value;
   }
 
   getMatches() {

@@ -33,7 +33,7 @@ const repeatTestPlaceholder = repeat({
   ],
 });
 
-describe('repeat parser', async () => {
+describe('repeat parser', () => {
   test('will not allow multiple children', async () => {
     expect(() =>
       repeat({

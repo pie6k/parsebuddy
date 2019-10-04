@@ -9,7 +9,7 @@ import { createDataHolder } from '../base';
 const numberTest = number();
 const numberLimitTest = number({ max: 30, min: 5 });
 
-describe('number parser', async () => {
+describe('number parser', () => {
   test('will match number', async () => {
     expect(await getParserResultsCount(numberTest, '00')).toBe(1);
     expect(await getParserResultsCount(numberTest, '3')).toBe(1);
